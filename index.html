@@ -17,6 +17,7 @@
             --font-serif: 'Playfair Display', serif;
             --font-sans: 'Inter', sans-serif;
             --transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --vision-img: none; /* JS ile dinamik beslenecek */
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -31,9 +32,10 @@
             flex-direction: column;
             align-items: center;
             padding: 2rem 1rem;
+            padding-bottom: 5rem;
         }
 
-        /* 1. NETLEŞEN VİZYON - TAM GÖRÜNÜM */
+        /* 1. VİZYON ALANI */
         .vision-container {
             width: 100%;
             max-width: 700px;
@@ -51,23 +53,21 @@
 
         #vision-image {
             width: 100%;
-            max-height: 60vh; /* Kolajı tam göstermek için esnek yükseklik */
-            object-fit: contain; /* Görseli kesmeden sığdırır */
+            max-height: 60vh; 
+            object-fit: contain; 
             filter: grayscale(100%) blur(10px);
             transition: var(--transition);
         }
 
         .vision-overlay {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
+            bottom: 0; left: 0; width: 100%;
             padding: 2rem 1.5rem 1.5rem 1.5rem;
             background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
-            pointer-events: none; /* Altındaki görsele tıklamayı engellememek için */
+            pointer-events: none; 
         }
 
         .vision-title {
@@ -78,7 +78,6 @@
             pointer-events: auto;
         }
 
-        /* NETLEŞEN STREAK SAYACI */
         .streak-counter {
             font-size: 0.9rem;
             color: var(--accent);
@@ -90,270 +89,114 @@
         }
 
         .upload-btn-container {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            opacity: 0.3;
-            transition: var(--transition);
-            z-index: 10;
+            position: absolute; top: 1rem; right: 1rem;
+            opacity: 0.3; transition: var(--transition); z-index: 10;
         }
-        
         .vision-container:hover .upload-btn-container { opacity: 1; }
 
         input[type="file"] { display: none; }
         .upload-label {
-            background: rgba(0,0,0,0.7);
-            color: var(--text-main);
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            border: 1px solid var(--border);
-            backdrop-filter: blur(4px);
+            background: rgba(0,0,0,0.7); color: var(--text-main);
+            padding: 0.5rem 1rem; border-radius: 4px; font-size: 0.8rem;
+            cursor: pointer; border: 1px solid var(--border); backdrop-filter: blur(4px);
         }
 
-        /* 2. ALIŞKANLIK VE ALT HEDEF KARTLARI */
-        .tracker-board {
-            width: 100%;
-            max-width: 700px;
-        }
-
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 1rem;
-        }
-
-        .add-btn {
-            background: transparent;
-            color: var(--accent);
-            border: 1px solid var(--accent);
-            padding: 0.5rem 1.2rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-family: var(--font-sans);
-            font-size: 0.9rem;
-            transition: var(--transition);
-        }
-
+        /* 2. ALIŞKANLIK KARTLARI (Kısaltıldı) */
+        .tracker-board { width: 100%; max-width: 700px; margin-bottom: 3rem; }
+        .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
+        .add-btn { background: transparent; color: var(--accent); border: 1px solid var(--accent); padding: 0.5rem 1.2rem; border-radius: 4px; cursor: pointer; font-family: var(--font-sans); font-size: 0.9rem; transition: var(--transition); }
         .add-btn:hover { background: var(--accent); color: #000; }
-
         .progress-text { font-family: var(--font-serif); color: var(--text-muted); }
 
-        .habit-item {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            overflow: hidden;
-            transition: var(--transition);
-        }
-
-        .habit-header {
-            padding: 1.2rem;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-        }
-
+        .habit-item { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 1rem; overflow: hidden; transition: var(--transition); }
+        .habit-header { padding: 1.2rem; display: flex; align-items: center; cursor: pointer; }
         .habit-header:hover { background: var(--surface-hover); }
 
-        .checkbox {
-            width: 22px;
-            height: 22px;
-            border: 1px solid var(--text-muted);
-            border-radius: 4px; /* Yuvarlağımsı kare */
-            margin-right: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: var(--transition);
-            flex-shrink: 0;
-        }
+        .checkbox { width: 22px; height: 22px; border: 1px solid var(--text-muted); border-radius: 4px; margin-right: 1rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--transition); flex-shrink: 0; }
+        .habit-item.done > .habit-header .checkbox, .subtask-item.done .checkbox { background: var(--accent); border-color: var(--accent); }
+        .checkbox::after { content: '✓'; color: #000; font-size: 14px; font-weight: bold; opacity: 0; transition: var(--transition); }
+        .habit-item.done > .habit-header .checkbox::after, .subtask-item.done .checkbox::after { opacity: 1; }
 
-        .habit-item.done > .habit-header .checkbox,
-        .subtask-item.done .checkbox {
-            background: var(--accent);
-            border-color: var(--accent);
-        }
-
-        .checkbox::after {
-            content: '✓';
-            color: #000;
-            font-size: 14px;
-            font-weight: bold;
-            opacity: 0;
-            transition: var(--transition);
-        }
-
-        .habit-item.done > .habit-header .checkbox::after,
-        .subtask-item.done .checkbox::after { opacity: 1; }
-
-        .habit-title {
-            flex-grow: 1;
-            font-size: 1.1rem;
-            transition: var(--transition);
-            font-weight: 400;
-        }
-
-        .habit-item.done > .habit-header .habit-title {
-            color: var(--text-muted);
-            text-decoration: line-through;
-        }
-
-        .habit-actions button {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            margin-left: 0.8rem;
-            font-size: 0.85rem;
-            transition: var(--transition);
-        }
-
+        .habit-title { flex-grow: 1; font-size: 1.1rem; transition: var(--transition); font-weight: 400; }
+        .habit-item.done > .habit-header .habit-title { color: var(--text-muted); text-decoration: line-through; }
+        .habit-actions button { background: none; border: none; color: var(--text-muted); cursor: pointer; margin-left: 0.8rem; font-size: 0.85rem; transition: var(--transition); }
         .habit-actions button:hover { color: var(--text-main); }
 
-        /* DETAY VE ALT HEDEFLER */
-        .habit-details {
-            max-height: 0;
-            overflow: hidden;
-            background: #111;
-            transition: max-height 0.6s ease;
-        }
-        
+        .habit-details { max-height: 0; overflow: hidden; background: #111; transition: max-height 0.6s ease; }
         .habit-details.open { max-height: 1000px; }
+        .details-content { padding: 1.2rem; border-top: 1px dashed var(--border); }
+        .details-notes { font-size: 0.9rem; color: #aaa; margin-bottom: 1rem; white-space: pre-wrap; }
 
-        .details-content {
-            padding: 1.2rem;
-            border-top: 1px dashed var(--border);
-        }
-
-        .details-notes {
-            font-size: 0.9rem;
-            color: #aaa;
-            margin-bottom: 1rem;
-            white-space: pre-wrap;
-        }
-
-        /* ALT HEDEF / LİNK LİSTESİ */
-        .subtasks-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.8rem;
-        }
-
-        .subtask-item {
-            display: flex;
-            align-items: center;
-            background: #1a1a1a;
-            padding: 0.8rem 1rem;
-            border-radius: 6px;
-            border: 1px solid #2a2a2a;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
+        .subtasks-list { display: flex; flex-direction: column; gap: 0.8rem; }
+        .subtask-item { display: flex; align-items: center; background: #1a1a1a; padding: 0.8rem 1rem; border-radius: 6px; border: 1px solid #2a2a2a; cursor: pointer; transition: var(--transition); }
         .subtask-item:hover { background: #222; }
-
-        .subtask-item.done .subtask-title {
-            color: var(--text-muted);
-            text-decoration: line-through;
-        }
-
+        .subtask-item.done .subtask-title { color: var(--text-muted); text-decoration: line-through; }
         .subtask-title { flex-grow: 1; font-size: 0.9rem; transition: var(--transition); }
-        
-        .subtask-link {
-            color: var(--accent);
-            text-decoration: none;
-            font-size: 0.85rem;
-            border: 1px solid var(--accent);
-            padding: 0.2rem 0.6rem;
-            border-radius: 4px;
-            margin-left: 1rem;
-            transition: var(--transition);
-        }
-        
+        .subtask-link { color: var(--accent); text-decoration: none; font-size: 0.85rem; border: 1px solid var(--accent); padding: 0.2rem 0.6rem; border-radius: 4px; margin-left: 1rem; transition: var(--transition); }
         .subtask-link:hover { background: var(--accent); color: #000; }
 
-        /* MODAL (EKLE / DÜZENLE) */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(8px);
+        /* 3. TAKVİM ALANI */
+        .calendar-section { width: 100%; max-width: 700px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .calendar-header h3 { font-family: var(--font-serif); font-weight: 400; color: var(--accent); letter-spacing: 1px; }
+        .cal-nav-btn { background: transparent; border: 1px solid var(--border); color: var(--text-main); padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; transition: var(--transition); }
+        .cal-nav-btn:hover { background: var(--border); }
+
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+        .cal-day-name { text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .cal-cell {
+            aspect-ratio: 1;
+            position: relative;
+            border-radius: 8px;
+            border: 1px solid #2a2a2a;
+            overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            opacity: 0;
-            pointer-events: none;
+            cursor: pointer;
             transition: var(--transition);
-            z-index: 100;
         }
 
+        .cal-cell:hover { border-color: var(--accent); transform: translateY(-2px); }
+        .cal-cell.empty { background: transparent; border: none; cursor: default; }
+        .cal-cell.empty:hover { transform: none; }
+
+        /* Takvim Günü İçin Dinamik Arka Plan */
+        .cal-cell::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: var(--vision-img);
+            background-size: cover;
+            background-position: center;
+            filter: grayscale(100%) blur(3px); /* Yapılmayan günler bulanık ve renksiz */
+            opacity: 0.2;
+            transition: var(--transition);
+            z-index: 0;
+        }
+
+        .cal-cell.done::before {
+            filter: grayscale(0%) blur(0px); /* Yapılan günler NET ve RENKLİ */
+            opacity: 0.7;
+        }
+
+        .cal-cell.today { border: 1px solid var(--accent); }
+        .cal-cell span { position: relative; z-index: 1; font-weight: 600; font-size: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+        .cal-cell.done span { color: var(--accent); }
+
+        /* MODAL */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: var(--transition); z-index: 100; }
         .modal-overlay.active { opacity: 1; pointer-events: all; }
-
-        .modal {
-            background: var(--surface);
-            padding: 2rem;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
-            border: 1px solid var(--border);
-        }
-
-        .modal input, .modal textarea {
-            width: 100%;
-            background: #0d0d0d;
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            padding: 0.8rem;
-            margin-bottom: 1rem;
-            border-radius: 4px;
-            font-family: var(--font-sans);
-        }
-
+        .modal { background: var(--surface); padding: 2rem; border-radius: 8px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); }
+        .modal input, .modal textarea { width: 100%; background: #0d0d0d; border: 1px solid var(--border); color: var(--text-main); padding: 0.8rem; margin-bottom: 1rem; border-radius: 4px; font-family: var(--font-sans); }
         .modal textarea { min-height: 80px; resize: vertical; }
-
         .subtask-inputs-container { margin-bottom: 1.5rem; }
-        
-        .subtask-input-group {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-            align-items: flex-start;
-        }
-
+        .subtask-input-group { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; align-items: flex-start; }
         .subtask-input-group input { margin-bottom: 0; }
-        .subtask-input-group button {
-            background: transparent;
-            border: 1px solid #555;
-            color: #ff4d4d;
-            padding: 0.8rem;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .add-subtask-btn {
-            background: transparent;
-            color: var(--text-muted);
-            border: 1px dashed var(--border);
-            padding: 0.5rem;
-            width: 100%;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            margin-bottom: 1rem;
-        }
+        .subtask-input-group button { background: transparent; border: 1px solid #555; color: #ff4d4d; padding: 0.8rem; border-radius: 4px; cursor: pointer; }
+        .add-subtask-btn { background: transparent; color: var(--text-muted); border: 1px dashed var(--border); padding: 0.5rem; width: 100%; border-radius: 4px; cursor: pointer; font-size: 0.85rem; margin-bottom: 1rem; }
         .add-subtask-btn:hover { color: var(--text-main); border-color: var(--text-muted); }
-
         .modal-actions { display: flex; justify-content: flex-end; gap: 1rem; border-top: 1px solid var(--border); padding-top: 1.5rem; }
-        
         .btn-cancel { background: transparent; border: none; color: var(--text-muted); cursor: pointer; }
         .btn-save { background: var(--text-main); color: #000; border: none; padding: 0.6rem 1.8rem; border-radius: 4px; cursor: pointer; font-weight: 600; }
 
@@ -377,7 +220,7 @@
         </div>
     </div>
 
-    <!-- ALIŞKANLIK VE ALT HEDEFLER PANELİ -->
+    <!-- ALIŞKANLIK PANELİ -->
     <div class="tracker-board">
         <div class="controls">
             <div class="progress-text" id="progress-text">Netlik: %0</div>
@@ -386,20 +229,28 @@
         <div id="habits-container"></div>
     </div>
 
+    <!-- TAKVİM PANELİ -->
+    <div class="calendar-section">
+        <div class="calendar-header">
+            <button class="cal-nav-btn" onclick="changeMonth(-1)">&#8592; Önceki</button>
+            <h3 id="calendar-month-year">Temmuz 2026</h3>
+            <button class="cal-nav-btn" onclick="changeMonth(1)">Sonraki &#8594;</button>
+        </div>
+        <div class="calendar-grid" id="calendar-grid">
+            <!-- JS Dolduracak -->
+        </div>
+    </div>
+
     <!-- MODAL -->
     <div class="modal-overlay" id="modal">
         <div class="modal">
             <h3 style="margin-bottom: 1.5rem; font-family: var(--font-serif); font-weight: 400; color: var(--accent);">Odak Düzenle</h3>
             <input type="hidden" id="habit-id">
             <input type="text" id="habit-title" placeholder="Ana Başlık (Örn: Lenf Masajı & Bakım)">
-            <textarea id="habit-details" placeholder="Genel notlar veya görsel HTML kodları (İsteğe bağlı)"></textarea>
-            
+            <textarea id="habit-details" placeholder="Genel notlar veya görsel HTML kodları"></textarea>
             <h4 style="margin-bottom: 0.8rem; font-size: 0.9rem; color: var(--text-muted);">Alt Hedefler ve Linkler (Zincir)</h4>
-            <div id="modal-subtasks-container" class="subtask-inputs-container">
-                <!-- JS ile alt hedef inputları buraya gelecek -->
-            </div>
+            <div id="modal-subtasks-container" class="subtask-inputs-container"></div>
             <button class="add-subtask-btn" onclick="addSubtaskInput()">+ Alt Hedef / Link Ekle</button>
-
             <div class="modal-actions">
                 <button class="btn-cancel" onclick="closeModal()">İptal</button>
                 <button class="btn-save" onclick="saveHabit()">Kaydet</button>
@@ -409,60 +260,56 @@
 
     <script>
         // --- VERİ YAPISI ---
-        let habits = JSON.parse(localStorage.getItem('coreZenHabits')) || [
-            { 
-                id: Date.now(), 
-                title: 'Lenf Masajı & Bakım Rutini', 
-                details: 'Sabah uyanınca yapılacak öncelikli fiziksel arınma adımları.', 
-                done: false,
-                subtasks: [
-                    { id: 1, title: 'Boyun vuruşları ve drenaj', url: '', done: false },
-                    { id: 2, title: 'Kuru fırçalama (Pinterest Referans)', url: 'https://tr.pinterest.com/', done: false }
-                ]
-            }
-        ];
+        let habits = JSON.parse(localStorage.getItem('coreZenHabits')) || [];
+        let historyData = JSON.parse(localStorage.getItem('coreZenHistory')) || {}; 
+        let currentStreak = parseInt(localStorage.getItem('coreZenStreak')) || 0;
         
-        let streak = parseInt(localStorage.getItem('coreZenStreak')) || 0;
-        let lastCompletedDate = localStorage.getItem('coreZenLastDate') || '';
         let visionDataUrl = localStorage.getItem('coreZenVision') || 'https://images.unsplash.com/photo-1606240724602-5b21f896eae8?q=80&w=1000&auto=format&fit=crop';
-
+        
+        // Fotoğrafı hem image etiketine hem de CSS değişkenine (Takvim için) ata
         document.getElementById('vision-image').src = visionDataUrl;
+        document.documentElement.style.setProperty('--vision-img', `url(${visionDataUrl})`);
+
+        // Tarih Formatlayıcı (Yerel Saat Dilimi Sorunlarını Önlemek İçin YYYY-MM-DD)
+        function getLocalDateStr(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        const todayDate = new Date();
+        const todayStr = getLocalDateStr(todayDate);
 
         // --- GÜNLÜK SIFIRLAMA ---
         function checkDailyReset() {
-            const today = new Date().toLocaleDateString();
             const storedDate = localStorage.getItem('coreZenCurrentDate');
-            
-            if (storedDate !== today) {
+            if (storedDate !== todayStr) {
                 habits.forEach(h => {
                     h.done = false;
                     if(h.subtasks) h.subtasks.forEach(st => st.done = false);
                 });
-                localStorage.setItem('coreZenCurrentDate', today);
-                saveData();
+                localStorage.setItem('coreZenCurrentDate', todayStr);
+                saveHabits();
             }
         }
 
-        // --- RENDER ---
+        // --- RENDER ALIŞKANLIKLAR ---
         function render() {
             const container = document.getElementById('habits-container');
             container.innerHTML = '';
-            
             let completedCount = 0;
 
             habits.forEach(habit => {
-                // Alt görevler varsa ve hepsi tamamlanmışsa ana görevi tamamla
                 if (habit.subtasks && habit.subtasks.length > 0) {
                     const allSubtasksDone = habit.subtasks.every(st => st.done);
                     habit.done = allSubtasksDone;
                 }
-
                 if(habit.done) completedCount++;
 
                 const item = document.createElement('div');
                 item.className = `habit-item ${habit.done ? 'done' : ''}`;
                 
-                // Alt görevlerin HTML'ini oluştur
                 let subtasksHtml = '';
                 if (habit.subtasks && habit.subtasks.length > 0) {
                     subtasksHtml = `<div class="subtasks-list">`;
@@ -470,11 +317,8 @@
                         const linkHtml = st.url ? `<a href="${st.url}" target="_blank" class="subtask-link" onclick="event.stopPropagation()">Linke Git</a>` : '';
                         subtasksHtml += `
                             <div class="subtask-item ${st.done ? 'done' : ''}" onclick="event.stopPropagation(); toggleSubtask(${habit.id}, ${st.id})">
-                                <div class="checkbox"></div>
-                                <span class="subtask-title">${st.title}</span>
-                                ${linkHtml}
-                            </div>
-                        `;
+                                <div class="checkbox"></div><span class="subtask-title">${st.title}</span>${linkHtml}
+                            </div>`;
                     });
                     subtasksHtml += `</div>`;
                 }
@@ -489,200 +333,198 @@
                         </div>
                     </div>
                     <div class="habit-details" id="details-${habit.id}">
-                        <div class="details-content">
-                            ${habit.details ? `<div class="details-notes">${habit.details}</div>` : ''}
-                            ${subtasksHtml}
-                        </div>
-                    </div>
-                `;
+                        <div class="details-content">${habit.details ? `<div class="details-notes">${habit.details}</div>` : ''}${subtasksHtml}</div>
+                    </div>`;
                 container.appendChild(item);
             });
 
-            updateVisionLogic(completedCount, habits.length);
+            updateVisionAndHistory(completedCount, habits.length);
         }
 
-        // --- VİZYON VE NETLEŞEN STREAK ---
-        function updateVisionLogic(completed, total) {
+        // --- VİZYON VE GEÇMİŞ SENKRONİZASYONU ---
+        function updateVisionAndHistory(completed, total) {
             const img = document.getElementById('vision-image');
             const progressText = document.getElementById('progress-text');
-            const streakDisplay = document.getElementById('streak-display');
             
             let percentage = total === 0 ? 0 : (completed / total);
             
-            // Fotoğraf Netleşmesi
+            // Üst Fotoğraf Filtreleri
             const grayValue = 100 - (percentage * 100);
             const blurValue = 10 - (percentage * 10);
             img.style.filter = `grayscale(${grayValue}%) blur(${blurValue}px)`;
             progressText.innerText = `Netlik: %${Math.round(percentage * 100)}`;
 
-            // Streak Mantığı
-            const today = new Date().toLocaleDateString();
-            if (percentage === 1 && total > 0) {
-                if (lastCompletedDate !== today) {
-                    streak++;
-                    lastCompletedDate = today;
-                    localStorage.setItem('coreZenLastDate', lastCompletedDate);
+            // Bugünün %100 durumunu History'ye işle (Eğer habit varsa)
+            if (total > 0 && percentage === 1) {
+                historyData[todayStr] = true;
+            } else if (total > 0 && percentage < 1 && historyData[todayStr]) {
+                delete historyData[todayStr];
+            }
+            saveHistory();
+            recalculateStreak();
+            renderCalendar(); // Takvimi güncelle
+        }
+
+        // --- MATEMATİKSEL STREAK HESAPLAMA ---
+        // Algoritma: Bugünden başlar, geriye doğru eksiksiz gidilen günleri sayar.
+        function recalculateStreak() {
+            let streak = 0;
+            let checkDate = new Date();
+            checkDate.setHours(0,0,0,0);
+            
+            // Eğer bugün yapılmadıysa, streak hesaplamaya dünden başla
+            if (!historyData[getLocalDateStr(checkDate)]) {
+                checkDate.setDate(checkDate.getDate() - 1);
+                // Dün de yapılmadıysa streak 0'dır, değilse geriye gitmeye başla
+                if (!historyData[getLocalDateStr(checkDate)]) {
+                    updateStreakUI(0);
+                    return;
                 }
-            } else {
-                if (lastCompletedDate === today) {
-                    streak = Math.max(0, streak - 1);
-                    lastCompletedDate = '';
-                    localStorage.removeItem('coreZenLastDate');
+            }
+
+            // Geriye doğru kesintisiz günleri say
+            while (true) {
+                let dStr = getLocalDateStr(checkDate);
+                if (historyData[dStr]) {
+                    streak++;
+                    checkDate.setDate(checkDate.getDate() - 1);
+                } else {
+                    break;
                 }
             }
             
+            updateStreakUI(streak);
+        }
+
+        function updateStreakUI(streak) {
+            currentStreak = streak;
             localStorage.setItem('coreZenStreak', streak);
+            
+            const streakDisplay = document.getElementById('streak-display');
             streakDisplay.innerText = `0.6 İcraat Döngüsü: ${streak} Gün`;
 
-            // *** Streak Netleşme Görsel Efekti ***
-            // 0'da bulanık ve soluk. 5 ve üzerinde tamamen keskin ve parlak altın.
             const streakBlur = Math.max(0, 4 - streak); 
             const streakOpacity = Math.min(1, 0.4 + (streak * 0.15));
             const shadowIntensity = Math.min(10, streak * 2);
             
             streakDisplay.style.filter = `blur(${streakBlur}px)`;
             streakDisplay.style.opacity = streakOpacity;
-            if(streak > 0) {
-                streakDisplay.style.textShadow = `0 0 ${shadowIntensity}px rgba(212, 175, 55, 0.5)`;
+            streakDisplay.style.textShadow = streak > 0 ? `0 0 ${shadowIntensity}px rgba(212, 175, 55, 0.5)` : 'none';
+        }
+
+        // --- TAKVİM MANTIĞI ---
+        let currentCalDate = new Date();
+        const monthNames = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+        const dayNames = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
+
+        function renderCalendar() {
+            const year = currentCalDate.getFullYear();
+            const month = currentCalDate.getMonth();
+            
+            document.getElementById('calendar-month-year').innerText = `${monthNames[month]} ${year}`;
+            
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+
+            // Gün İsimleri
+            dayNames.forEach(day => {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'cal-day-name';
+                dayEl.innerText = day;
+                grid.appendChild(dayEl);
+            });
+
+            // Ayın ilk gününü bul (Pazartesi=1, Pazar=7 mantığı için JS'de Pazar=0'dır)
+            const firstDay = new Date(year, month, 1);
+            let startingDay = firstDay.getDay();
+            if (startingDay === 0) startingDay = 7; // Pazar gününü sona at
+
+            // Boş hücreleri doldur
+            for (let i = 1; i < startingDay; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = 'cal-cell empty';
+                grid.appendChild(emptyCell);
+            }
+
+            // Ayın günlerini doldur
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            for (let i = 1; i <= daysInMonth; i++) {
+                const cellDate = new Date(year, month, i);
+                const cellDateStr = getLocalDateStr(cellDate);
+                
+                const cell = document.createElement('div');
+                cell.className = 'cal-cell';
+                if (cellDateStr === todayStr) cell.classList.add('today');
+                if (historyData[cellDateStr]) cell.classList.add('done');
+
+                cell.innerHTML = `<span>${i}</span>`;
+                
+                // Geriye dönük işaretleme (Sadece bugünden önceki veya bugünkü günler tıklanabilir)
+                if (cellDate <= todayDate) {
+                    cell.onclick = () => toggleCalendarDay(cellDateStr);
+                } else {
+                    cell.style.cursor = 'default';
+                    cell.style.opacity = '0.5';
+                }
+
+                grid.appendChild(cell);
+            }
+        }
+
+        function toggleCalendarDay(dateStr) {
+            // Eğer tıklanan gün bugün ise, alışkanlıkları otomatik tamamlama / geri alma karmaşası yaratmamak için uyarı ver
+            if (dateStr === todayStr) {
+                alert("Bugünün durumunu değiştirmek için lütfen yukarıdaki görevleri işaretleyin.");
+                return;
+            }
+
+            // Geçmiş bir günü işaretle / kaldır
+            if (historyData[dateStr]) {
+                delete historyData[dateStr];
             } else {
-                streakDisplay.style.textShadow = 'none';
+                historyData[dateStr] = true;
             }
+            saveHistory();
+            recalculateStreak();
+            renderCalendar();
         }
 
-        // --- ETKİLEŞİMLER ---
-        function toggleDone(habitId) {
-            const habit = habits.find(h => h.id === habitId);
-            if(habit) {
-                habit.done = !habit.done;
-                // Ana görev işaretlenirse/kaldırılırsa alt görevleri de senkronize et
-                if(habit.subtasks) {
-                    habit.subtasks.forEach(st => st.done = habit.done);
-                }
-                saveData();
-                render();
-            }
+        function changeMonth(dir) {
+            currentCalDate.setMonth(currentCalDate.getMonth() + dir);
+            renderCalendar();
         }
 
-        function toggleSubtask(habitId, subtaskId) {
-            const habit = habits.find(h => h.id === habitId);
-            if(habit && habit.subtasks) {
-                const subtask = habit.subtasks.find(st => st.id === subtaskId);
-                if(subtask) {
-                    subtask.done = !subtask.done;
-                    saveData();
-                    render();
-                }
-            }
-        }
+        // --- ETKİLEŞİMLER & MODAL & KAYIT ---
+        function toggleDone(habitId) { const h = habits.find(x => x.id === habitId); if(h) { h.done = !h.done; if(h.subtasks) h.subtasks.forEach(st => st.done = h.done); saveHabits(); render(); } }
+        function toggleSubtask(hId, sId) { const h = habits.find(x => x.id === hId); if(h && h.subtasks) { const s = h.subtasks.find(x => x.id === sId); if(s) { s.done = !s.done; saveHabits(); render(); } } }
+        function toggleDetails(id) { document.getElementById(`details-${id}`).classList.toggle('open'); }
+        function deleteHabit(id) { if(confirm('Silmek istediğine emin misin?')) { habits = habits.filter(h => h.id !== id); saveHabits(); render(); } }
 
-        function toggleDetails(id) {
-            const detailsDiv = document.getElementById(`details-${id}`);
-            detailsDiv.classList.toggle('open');
-        }
-
-        function deleteHabit(id) {
-            if(confirm('Bu kategoriyi silmek istediğine emin misin?')) {
-                habits = habits.filter(h => h.id !== id);
-                saveData();
-                render();
-            }
-        }
-
-        // --- MODAL VE ALT HEDEF YÖNETİMİ ---
         const modal = document.getElementById('modal');
         const idInput = document.getElementById('habit-id');
         const titleInput = document.getElementById('habit-title');
         const detailsInput = document.getElementById('habit-details');
-        const subtasksContainer = document.getElementById('modal-subtasks-container');
-
-        // Modal içindeki mevcut subtask datalarını geçici tutmak için
+        const stContainer = document.getElementById('modal-subtasks-container');
         let tempSubtasks = [];
 
-        function openModal() {
-            idInput.value = '';
-            titleInput.value = '';
-            detailsInput.value = '';
-            tempSubtasks = [];
-            renderModalSubtasks();
-            modal.classList.add('active');
-        }
-
-        function closeModal() {
-            modal.classList.remove('active');
-        }
-
-        function editHabit(id) {
-            const habit = habits.find(h => h.id === id);
-            if(habit) {
-                idInput.value = habit.id;
-                titleInput.value = habit.title;
-                detailsInput.value = habit.details || '';
-                // Alt görevleri derin kopyala (iptal ederse asılları bozulmasın diye)
-                tempSubtasks = habit.subtasks ? JSON.parse(JSON.stringify(habit.subtasks)) : [];
-                renderModalSubtasks();
-                modal.classList.add('active');
-            }
-        }
-
-        function renderModalSubtasks() {
-            subtasksContainer.innerHTML = '';
-            tempSubtasks.forEach((st, index) => {
-                const div = document.createElement('div');
-                div.className = 'subtask-input-group';
-                div.innerHTML = `
-                    <input type="text" class="st-title-input" placeholder="Alt Hedef Adı" value="${st.title}" onchange="updateTempSubtask(${index}, 'title', this.value)">
-                    <input type="text" class="st-url-input" placeholder="Link URL (İsteğe bağlı)" value="${st.url || ''}" onchange="updateTempSubtask(${index}, 'url', this.value)">
-                    <button onclick="removeTempSubtask(${index})">X</button>
-                `;
-                subtasksContainer.appendChild(div);
-            });
-        }
-
-        function addSubtaskInput() {
-            tempSubtasks.push({ id: Date.now() + Math.random(), title: '', url: '', done: false });
-            renderModalSubtasks();
-        }
-
-        function updateTempSubtask(index, field, value) {
-            tempSubtasks[index][field] = value;
-        }
-
-        function removeTempSubtask(index) {
-            tempSubtasks.splice(index, 1);
-            renderModalSubtasks();
-        }
+        function openModal() { idInput.value = ''; titleInput.value = ''; detailsInput.value = ''; tempSubtasks = []; renderModalSubtasks(); modal.classList.add('active'); }
+        function closeModal() { modal.classList.remove('active'); }
+        function editHabit(id) { const h = habits.find(x => x.id === id); if(h) { idInput.value = h.id; titleInput.value = h.title; detailsInput.value = h.details || ''; tempSubtasks = h.subtasks ? JSON.parse(JSON.stringify(h.subtasks)) : []; renderModalSubtasks(); modal.classList.add('active'); } }
+        function renderModalSubtasks() { stContainer.innerHTML = ''; tempSubtasks.forEach((st, i) => { stContainer.innerHTML += `<div class="subtask-input-group"><input type="text" placeholder="Alt Hedef Adı" value="${st.title}" onchange="updateTempSubtask(${i}, 'title', this.value)"><input type="text" placeholder="URL (İsteğe bağlı)" value="${st.url || ''}" onchange="updateTempSubtask(${i}, 'url', this.value)"><button onclick="removeTempSubtask(${i})">X</button></div>`; }); }
+        function addSubtaskInput() { tempSubtasks.push({ id: Date.now() + Math.random(), title: '', url: '', done: false }); renderModalSubtasks(); }
+        function updateTempSubtask(i, f, v) { tempSubtasks[i][f] = v; }
+        function removeTempSubtask(i) { tempSubtasks.splice(i, 1); renderModalSubtasks(); }
 
         function saveHabit() {
-            const id = idInput.value;
-            const title = titleInput.value.trim();
-            const details = detailsInput.value.trim();
-
-            if(!title) return alert('Lütfen bir ana başlık girin.');
-
-            // Boş alt görevleri temizle
-            const finalSubtasks = tempSubtasks.filter(st => st.title.trim() !== '');
-
-            if(id) {
-                const habit = habits.find(h => h.id === parseInt(id));
-                habit.title = title;
-                habit.details = details;
-                habit.subtasks = finalSubtasks;
-            } else {
-                habits.push({
-                    id: Date.now(),
-                    title: title,
-                    details: details,
-                    subtasks: finalSubtasks,
-                    done: false
-                });
-            }
-
-            saveData();
-            closeModal();
-            render();
+            const id = idInput.value; const title = titleInput.value.trim(); const details = detailsInput.value.trim();
+            if(!title) return alert('Ana başlık girin.');
+            const finalSt = tempSubtasks.filter(st => st.title.trim() !== '');
+            if(id) { const h = habits.find(x => x.id === parseInt(id)); h.title = title; h.details = details; h.subtasks = finalSt; } 
+            else { habits.push({ id: Date.now(), title, details, subtasks: finalSt, done: false }); }
+            saveHabits(); closeModal(); render();
         }
 
-        // --- FOTOĞRAF YÜKLEME ---
         document.getElementById('vision-upload').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if(file) {
@@ -690,18 +532,18 @@
                 reader.onload = function(event) {
                     visionDataUrl = event.target.result;
                     document.getElementById('vision-image').src = visionDataUrl;
-                    try {
-                        localStorage.setItem('coreZenVision', visionDataUrl);
-                    } catch (error) {
-                        alert('Dosya boyutu çok büyük. Lütfen LocalStorage limitlerini aşmamak için daha küçük boyutlu bir fotoğraf seçin.');
-                    }
+                    document.documentElement.style.setProperty('--vision-img', `url(${visionDataUrl})`); // Takvim için güncelle
+                    try { localStorage.setItem('coreZenVision', visionDataUrl); } 
+                    catch (e) { alert('Boyut çok büyük. Daha küçük bir görsel seçin.'); }
                 };
                 reader.readAsDataURL(file);
             }
         });
 
-        function saveData() { localStorage.setItem('coreZenHabits', JSON.stringify(habits)); }
+        function saveHabits() { localStorage.setItem('coreZenHabits', JSON.stringify(habits)); }
+        function saveHistory() { localStorage.setItem('coreZenHistory', JSON.stringify(historyData)); }
 
+        // BAŞLAT
         checkDailyReset();
         render();
     </script>
