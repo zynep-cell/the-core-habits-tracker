@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Core Zen | Habit Tracker</title>
-    <!-- Lüks serif ve sans-serif fontlar (Shibumi estetiği) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -12,8 +11,8 @@
             --surface: #1a1a1a;
             --surface-hover: #262626;
             --text-main: #e0e0e0;
-            --text-muted: #808080;
-            --accent: #d4af37; /* Altın/Bronz nötr ton */
+            --text-muted: #666666;
+            --accent: #d4af37; 
             --border: #333333;
             --font-serif: 'Playfair Display', serif;
             --font-sans: 'Inter', sans-serif;
@@ -34,25 +33,26 @@
             padding: 2rem 1rem;
         }
 
-        /* 1. NETLEŞEN VİZYON */
+        /* 1. NETLEŞEN VİZYON - TAM GÖRÜNÜM */
         .vision-container {
             width: 100%;
-            max-width: 600px;
-            height: 300px;
+            max-width: 700px;
             border-radius: 12px;
             overflow: hidden;
             position: relative;
-            margin-bottom: 2rem;
+            margin-bottom: 2.5rem;
             border: 1px solid var(--border);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
             background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         #vision-image {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
-            /* Başlangıç filtreleri - JS tarafından dinamik ezilecek */
+            max-height: 60vh; /* Kolajı tam göstermek için esnek yükseklik */
+            object-fit: contain; /* Görseli kesmeden sığdırır */
             filter: grayscale(100%) blur(10px);
             transition: var(--transition);
         }
@@ -60,12 +60,14 @@
         .vision-overlay {
             position: absolute;
             bottom: 0;
+            left: 0;
             width: 100%;
-            padding: 1.5rem;
-            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            padding: 2rem 1.5rem 1.5rem 1.5rem;
+            background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
+            pointer-events: none; /* Altındaki görsele tıklamayı engellememek için */
         }
 
         .vision-title {
@@ -73,13 +75,18 @@
             font-size: 1.8rem;
             font-weight: 400;
             letter-spacing: 1px;
+            pointer-events: auto;
         }
 
+        /* NETLEŞEN STREAK SAYACI */
         .streak-counter {
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             color: var(--accent);
             letter-spacing: 2px;
             text-transform: uppercase;
+            font-weight: 600;
+            transition: all 0.8s ease;
+            pointer-events: auto;
         }
 
         .upload-btn-container {
@@ -88,13 +95,14 @@
             right: 1rem;
             opacity: 0.3;
             transition: var(--transition);
+            z-index: 10;
         }
         
         .vision-container:hover .upload-btn-container { opacity: 1; }
 
         input[type="file"] { display: none; }
         .upload-label {
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.7);
             color: var(--text-main);
             padding: 0.5rem 1rem;
             border-radius: 4px;
@@ -104,10 +112,10 @@
             backdrop-filter: blur(4px);
         }
 
-        /* 2. ZENGİN MEDYALI ALIŞKANLIK KARTLARI */
+        /* 2. ALIŞKANLIK VE ALT HEDEF KARTLARI */
         .tracker-board {
             width: 100%;
-            max-width: 600px;
+            max-width: 700px;
         }
 
         .controls {
@@ -131,10 +139,7 @@
             transition: var(--transition);
         }
 
-        .add-btn:hover {
-            background: var(--accent);
-            color: #000;
-        }
+        .add-btn:hover { background: var(--accent); color: #000; }
 
         .progress-text { font-family: var(--font-serif); color: var(--text-muted); }
 
@@ -157,19 +162,21 @@
         .habit-header:hover { background: var(--surface-hover); }
 
         .checkbox {
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
             border: 1px solid var(--text-muted);
-            border-radius: 50%;
+            border-radius: 4px; /* Yuvarlağımsı kare */
             margin-right: 1rem;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: var(--transition);
+            flex-shrink: 0;
         }
 
-        .habit-item.done .checkbox {
+        .habit-item.done > .habit-header .checkbox,
+        .subtask-item.done .checkbox {
             background: var(--accent);
             border-color: var(--accent);
         }
@@ -178,19 +185,22 @@
             content: '✓';
             color: #000;
             font-size: 14px;
+            font-weight: bold;
             opacity: 0;
             transition: var(--transition);
         }
 
-        .habit-item.done .checkbox::after { opacity: 1; }
+        .habit-item.done > .habit-header .checkbox::after,
+        .subtask-item.done .checkbox::after { opacity: 1; }
 
         .habit-title {
             flex-grow: 1;
             font-size: 1.1rem;
             transition: var(--transition);
+            font-weight: 400;
         }
 
-        .habit-item.done .habit-title {
+        .habit-item.done > .habit-header .habit-title {
             color: var(--text-muted);
             text-decoration: line-through;
         }
@@ -201,34 +211,80 @@
             color: var(--text-muted);
             cursor: pointer;
             margin-left: 0.8rem;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             transition: var(--transition);
         }
 
         .habit-actions button:hover { color: var(--text-main); }
 
+        /* DETAY VE ALT HEDEFLER */
         .habit-details {
             max-height: 0;
             overflow: hidden;
             background: #111;
-            transition: max-height 0.5s ease;
+            transition: max-height 0.6s ease;
         }
-
-        .habit-details.open { max-height: 500px; /* Medya yüksekliğine göre açılır */ }
+        
+        .habit-details.open { max-height: 1000px; }
 
         .details-content {
             padding: 1.2rem;
             border-top: 1px dashed var(--border);
-            font-size: 0.9rem;
-            color: var(--text-muted);
         }
 
-        /* Modal (Ekle/Düzenle) */
+        .details-notes {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-bottom: 1rem;
+            white-space: pre-wrap;
+        }
+
+        /* ALT HEDEF / LİNK LİSTESİ */
+        .subtasks-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .subtask-item {
+            display: flex;
+            align-items: center;
+            background: #1a1a1a;
+            padding: 0.8rem 1rem;
+            border-radius: 6px;
+            border: 1px solid #2a2a2a;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .subtask-item:hover { background: #222; }
+
+        .subtask-item.done .subtask-title {
+            color: var(--text-muted);
+            text-decoration: line-through;
+        }
+
+        .subtask-title { flex-grow: 1; font-size: 0.9rem; transition: var(--transition); }
+        
+        .subtask-link {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.85rem;
+            border: 1px solid var(--accent);
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            margin-left: 1rem;
+            transition: var(--transition);
+        }
+        
+        .subtask-link:hover { background: var(--accent); color: #000; }
+
+        /* MODAL (EKLE / DÜZENLE) */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(5px);
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -245,13 +301,15 @@
             padding: 2rem;
             border-radius: 8px;
             width: 90%;
-            max-width: 500px;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
             border: 1px solid var(--border);
         }
 
         .modal input, .modal textarea {
             width: 100%;
-            background: #000;
+            background: #0d0d0d;
             border: 1px solid var(--border);
             color: var(--text-main);
             padding: 0.8rem;
@@ -260,22 +318,57 @@
             font-family: var(--font-sans);
         }
 
-        .modal textarea { min-height: 120px; resize: vertical; }
+        .modal textarea { min-height: 80px; resize: vertical; }
 
-        .modal-actions { display: flex; justify-content: flex-end; gap: 1rem; }
+        .subtask-inputs-container { margin-bottom: 1.5rem; }
+        
+        .subtask-input-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            align-items: flex-start;
+        }
+
+        .subtask-input-group input { margin-bottom: 0; }
+        .subtask-input-group button {
+            background: transparent;
+            border: 1px solid #555;
+            color: #ff4d4d;
+            padding: 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .add-subtask-btn {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px dashed var(--border);
+            padding: 0.5rem;
+            width: 100%;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+        .add-subtask-btn:hover { color: var(--text-main); border-color: var(--text-muted); }
+
+        .modal-actions { display: flex; justify-content: flex-end; gap: 1rem; border-top: 1px solid var(--border); padding-top: 1.5rem; }
         
         .btn-cancel { background: transparent; border: none; color: var(--text-muted); cursor: pointer; }
-        .btn-save { background: var(--text-main); color: #000; border: none; padding: 0.5rem 1.5rem; border-radius: 4px; cursor: pointer; font-weight: 600; }
+        .btn-save { background: var(--text-main); color: #000; border: none; padding: 0.6rem 1.8rem; border-radius: 4px; cursor: pointer; font-weight: 600; }
 
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
     </style>
 </head>
 <body>
 
     <!-- VİZYON ALANI -->
     <div class="vision-container">
-        <img id="vision-image" src="" alt="Vizyon Fotoğrafı">
+        <img id="vision-image" src="" alt="Vizyon Kolajı">
         <div class="upload-btn-container">
-            <label for="vision-upload" class="upload-label">Fotoğraf Değiştir</label>
+            <label for="vision-upload" class="upload-label">Kolaj / Fotoğraf Yükle</label>
             <input type="file" id="vision-upload" accept="image/*">
         </div>
         <div class="vision-overlay">
@@ -284,24 +377,29 @@
         </div>
     </div>
 
-    <!-- ALIŞKANLIK KONTROL PANELİ -->
+    <!-- ALIŞKANLIK VE ALT HEDEFLER PANELİ -->
     <div class="tracker-board">
         <div class="controls">
             <div class="progress-text" id="progress-text">Netlik: %0</div>
-            <button class="add-btn" onclick="openModal()">+ Yeni Odak Ekle</button>
+            <button class="add-btn" onclick="openModal()">+ Yeni Odak / Kategori Ekle</button>
         </div>
-        <div id="habits-container">
-            <!-- JS tarafından doldurulacak -->
-        </div>
+        <div id="habits-container"></div>
     </div>
 
-    <!-- MODAL (EKLE / DÜZENLE) -->
+    <!-- MODAL -->
     <div class="modal-overlay" id="modal">
         <div class="modal">
-            <h3 style="margin-bottom: 1.5rem; font-family: var(--font-serif); font-weight: 400;">Odak Düzenle</h3>
+            <h3 style="margin-bottom: 1.5rem; font-family: var(--font-serif); font-weight: 400; color: var(--accent);">Odak Düzenle</h3>
             <input type="hidden" id="habit-id">
-            <input type="text" id="habit-title" placeholder="Alışkanlık Adı (örn: Lenf Masajı)">
-            <textarea id="habit-details" placeholder="Medya veya Notlar (HTML destekler. Örn: <img src='link' style='width:100%'>)"></textarea>
+            <input type="text" id="habit-title" placeholder="Ana Başlık (Örn: Lenf Masajı & Bakım)">
+            <textarea id="habit-details" placeholder="Genel notlar veya görsel HTML kodları (İsteğe bağlı)"></textarea>
+            
+            <h4 style="margin-bottom: 0.8rem; font-size: 0.9rem; color: var(--text-muted);">Alt Hedefler ve Linkler (Zincir)</h4>
+            <div id="modal-subtasks-container" class="subtask-inputs-container">
+                <!-- JS ile alt hedef inputları buraya gelecek -->
+            </div>
+            <button class="add-subtask-btn" onclick="addSubtaskInput()">+ Alt Hedef / Link Ekle</button>
+
             <div class="modal-actions">
                 <button class="btn-cancel" onclick="closeModal()">İptal</button>
                 <button class="btn-save" onclick="saveHabit()">Kaydet</button>
@@ -310,33 +408,42 @@
     </div>
 
     <script>
-        // --- 1. VERİ YAPISI VE INITIALIZATION ---
-        // LocalStorage'dan verileri çek veya varsayılanları yükle
+        // --- VERİ YAPISI ---
         let habits = JSON.parse(localStorage.getItem('coreZenHabits')) || [
-            { id: Date.now(), title: 'Lenf Masajı', details: 'Sabah rutini. Boyun ve köprücük kemiği bölgelerine hafif vuruşlar.', done: false },
-            { id: Date.now() + 1, title: 'Ayak Bakımı', details: 'Ponza ve nemlendirici uygulaması.', done: false }
+            { 
+                id: Date.now(), 
+                title: 'Lenf Masajı & Bakım Rutini', 
+                details: 'Sabah uyanınca yapılacak öncelikli fiziksel arınma adımları.', 
+                done: false,
+                subtasks: [
+                    { id: 1, title: 'Boyun vuruşları ve drenaj', url: '', done: false },
+                    { id: 2, title: 'Kuru fırçalama (Pinterest Referans)', url: 'https://tr.pinterest.com/', done: false }
+                ]
+            }
         ];
         
         let streak = parseInt(localStorage.getItem('coreZenStreak')) || 0;
         let lastCompletedDate = localStorage.getItem('coreZenLastDate') || '';
-        let visionDataUrl = localStorage.getItem('coreZenVision') || 'https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?q=80&w=1000&auto=format&fit=crop'; // Minimalist varsayılan görsel
+        let visionDataUrl = localStorage.getItem('coreZenVision') || 'https://images.unsplash.com/photo-1606240724602-5b21f896eae8?q=80&w=1000&auto=format&fit=crop';
 
         document.getElementById('vision-image').src = visionDataUrl;
 
-        // --- 2. GÜNLÜK SIFIRLAMA KONTROLÜ ---
+        // --- GÜNLÜK SIFIRLAMA ---
         function checkDailyReset() {
             const today = new Date().toLocaleDateString();
             const storedDate = localStorage.getItem('coreZenCurrentDate');
             
             if (storedDate !== today) {
-                // Yeni gün gelmiş, tüm alışkanlıkları sıfırla
-                habits.forEach(h => h.done = false);
+                habits.forEach(h => {
+                    h.done = false;
+                    if(h.subtasks) h.subtasks.forEach(st => st.done = false);
+                });
                 localStorage.setItem('coreZenCurrentDate', today);
                 saveData();
             }
         }
 
-        // --- 3. ANA RENDER FONKSİYONLARI ---
+        // --- RENDER ---
         function render() {
             const container = document.getElementById('habits-container');
             container.innerHTML = '';
@@ -344,12 +451,34 @@
             let completedCount = 0;
 
             habits.forEach(habit => {
+                // Alt görevler varsa ve hepsi tamamlanmışsa ana görevi tamamla
+                if (habit.subtasks && habit.subtasks.length > 0) {
+                    const allSubtasksDone = habit.subtasks.every(st => st.done);
+                    habit.done = allSubtasksDone;
+                }
+
                 if(habit.done) completedCount++;
 
                 const item = document.createElement('div');
                 item.className = `habit-item ${habit.done ? 'done' : ''}`;
                 
-                // HTML structure for card
+                // Alt görevlerin HTML'ini oluştur
+                let subtasksHtml = '';
+                if (habit.subtasks && habit.subtasks.length > 0) {
+                    subtasksHtml = `<div class="subtasks-list">`;
+                    habit.subtasks.forEach(st => {
+                        const linkHtml = st.url ? `<a href="${st.url}" target="_blank" class="subtask-link" onclick="event.stopPropagation()">Linke Git</a>` : '';
+                        subtasksHtml += `
+                            <div class="subtask-item ${st.done ? 'done' : ''}" onclick="event.stopPropagation(); toggleSubtask(${habit.id}, ${st.id})">
+                                <div class="checkbox"></div>
+                                <span class="subtask-title">${st.title}</span>
+                                ${linkHtml}
+                            </div>
+                        `;
+                    });
+                    subtasksHtml += `</div>`;
+                }
+
                 item.innerHTML = `
                     <div class="habit-header" onclick="toggleDetails(${habit.id})">
                         <div class="checkbox" onclick="event.stopPropagation(); toggleDone(${habit.id})"></div>
@@ -360,7 +489,10 @@
                         </div>
                     </div>
                     <div class="habit-details" id="details-${habit.id}">
-                        <div class="details-content">${habit.details}</div>
+                        <div class="details-content">
+                            ${habit.details ? `<div class="details-notes">${habit.details}</div>` : ''}
+                            ${subtasksHtml}
+                        </div>
                     </div>
                 `;
                 container.appendChild(item);
@@ -369,7 +501,7 @@
             updateVisionLogic(completedCount, habits.length);
         }
 
-        // --- 4. VİZYON VE STREAK ALGORİTMASI ---
+        // --- VİZYON VE NETLEŞEN STREAK ---
         function updateVisionLogic(completed, total) {
             const img = document.getElementById('vision-image');
             const progressText = document.getElementById('progress-text');
@@ -377,10 +509,9 @@
             
             let percentage = total === 0 ? 0 : (completed / total);
             
-            // Kural: 0 done = %100 grayscale, 10px blur. 100% done = %0 grayscale, 0px blur.
+            // Fotoğraf Netleşmesi
             const grayValue = 100 - (percentage * 100);
             const blurValue = 10 - (percentage * 10);
-            
             img.style.filter = `grayscale(${grayValue}%) blur(${blurValue}px)`;
             progressText.innerText = `Netlik: %${Math.round(percentage * 100)}`;
 
@@ -393,7 +524,6 @@
                     localStorage.setItem('coreZenLastDate', lastCompletedDate);
                 }
             } else {
-                // Eğer tiki geri alırsa ve bugün streak kazandıysa, streak'i geri al
                 if (lastCompletedDate === today) {
                     streak = Math.max(0, streak - 1);
                     lastCompletedDate = '';
@@ -403,15 +533,45 @@
             
             localStorage.setItem('coreZenStreak', streak);
             streakDisplay.innerText = `0.6 İcraat Döngüsü: ${streak} Gün`;
+
+            // *** Streak Netleşme Görsel Efekti ***
+            // 0'da bulanık ve soluk. 5 ve üzerinde tamamen keskin ve parlak altın.
+            const streakBlur = Math.max(0, 4 - streak); 
+            const streakOpacity = Math.min(1, 0.4 + (streak * 0.15));
+            const shadowIntensity = Math.min(10, streak * 2);
+            
+            streakDisplay.style.filter = `blur(${streakBlur}px)`;
+            streakDisplay.style.opacity = streakOpacity;
+            if(streak > 0) {
+                streakDisplay.style.textShadow = `0 0 ${shadowIntensity}px rgba(212, 175, 55, 0.5)`;
+            } else {
+                streakDisplay.style.textShadow = 'none';
+            }
         }
 
-        // --- 5. ETKİLEŞİMLER (CRUD) ---
-        function toggleDone(id) {
-            const habit = habits.find(h => h.id === id);
+        // --- ETKİLEŞİMLER ---
+        function toggleDone(habitId) {
+            const habit = habits.find(h => h.id === habitId);
             if(habit) {
                 habit.done = !habit.done;
+                // Ana görev işaretlenirse/kaldırılırsa alt görevleri de senkronize et
+                if(habit.subtasks) {
+                    habit.subtasks.forEach(st => st.done = habit.done);
+                }
                 saveData();
                 render();
+            }
+        }
+
+        function toggleSubtask(habitId, subtaskId) {
+            const habit = habits.find(h => h.id === habitId);
+            if(habit && habit.subtasks) {
+                const subtask = habit.subtasks.find(st => st.id === subtaskId);
+                if(subtask) {
+                    subtask.done = !subtask.done;
+                    saveData();
+                    render();
+                }
             }
         }
 
@@ -421,23 +581,29 @@
         }
 
         function deleteHabit(id) {
-            if(confirm('Bu alışkanlığı silmek istediğine emin misin?')) {
+            if(confirm('Bu kategoriyi silmek istediğine emin misin?')) {
                 habits = habits.filter(h => h.id !== id);
                 saveData();
                 render();
             }
         }
 
-        // --- 6. MODAL YÖNETİMİ ---
+        // --- MODAL VE ALT HEDEF YÖNETİMİ ---
         const modal = document.getElementById('modal');
         const idInput = document.getElementById('habit-id');
         const titleInput = document.getElementById('habit-title');
         const detailsInput = document.getElementById('habit-details');
+        const subtasksContainer = document.getElementById('modal-subtasks-container');
+
+        // Modal içindeki mevcut subtask datalarını geçici tutmak için
+        let tempSubtasks = [];
 
         function openModal() {
             idInput.value = '';
             titleInput.value = '';
             detailsInput.value = '';
+            tempSubtasks = [];
+            renderModalSubtasks();
             modal.classList.add('active');
         }
 
@@ -450,9 +616,40 @@
             if(habit) {
                 idInput.value = habit.id;
                 titleInput.value = habit.title;
-                detailsInput.value = habit.details;
+                detailsInput.value = habit.details || '';
+                // Alt görevleri derin kopyala (iptal ederse asılları bozulmasın diye)
+                tempSubtasks = habit.subtasks ? JSON.parse(JSON.stringify(habit.subtasks)) : [];
+                renderModalSubtasks();
                 modal.classList.add('active');
             }
+        }
+
+        function renderModalSubtasks() {
+            subtasksContainer.innerHTML = '';
+            tempSubtasks.forEach((st, index) => {
+                const div = document.createElement('div');
+                div.className = 'subtask-input-group';
+                div.innerHTML = `
+                    <input type="text" class="st-title-input" placeholder="Alt Hedef Adı" value="${st.title}" onchange="updateTempSubtask(${index}, 'title', this.value)">
+                    <input type="text" class="st-url-input" placeholder="Link URL (İsteğe bağlı)" value="${st.url || ''}" onchange="updateTempSubtask(${index}, 'url', this.value)">
+                    <button onclick="removeTempSubtask(${index})">X</button>
+                `;
+                subtasksContainer.appendChild(div);
+            });
+        }
+
+        function addSubtaskInput() {
+            tempSubtasks.push({ id: Date.now() + Math.random(), title: '', url: '', done: false });
+            renderModalSubtasks();
+        }
+
+        function updateTempSubtask(index, field, value) {
+            tempSubtasks[index][field] = value;
+        }
+
+        function removeTempSubtask(index) {
+            tempSubtasks.splice(index, 1);
+            renderModalSubtasks();
         }
 
         function saveHabit() {
@@ -460,19 +657,22 @@
             const title = titleInput.value.trim();
             const details = detailsInput.value.trim();
 
-            if(!title) return alert('Lütfen bir başlık girin.');
+            if(!title) return alert('Lütfen bir ana başlık girin.');
+
+            // Boş alt görevleri temizle
+            const finalSubtasks = tempSubtasks.filter(st => st.title.trim() !== '');
 
             if(id) {
-                // Güncelle
                 const habit = habits.find(h => h.id === parseInt(id));
                 habit.title = title;
                 habit.details = details;
+                habit.subtasks = finalSubtasks;
             } else {
-                // Yeni Ekle
                 habits.push({
                     id: Date.now(),
                     title: title,
                     details: details,
+                    subtasks: finalSubtasks,
                     done: false
                 });
             }
@@ -482,7 +682,7 @@
             render();
         }
 
-        // --- 7. FOTOĞRAF YÜKLEME ---
+        // --- FOTOĞRAF YÜKLEME ---
         document.getElementById('vision-upload').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if(file) {
@@ -500,15 +700,10 @@
             }
         });
 
-        // Yardımcı Kaydetme Fonksiyonu
-        function saveData() {
-            localStorage.setItem('coreZenHabits', JSON.stringify(habits));
-        }
+        function saveData() { localStorage.setItem('coreZenHabits', JSON.stringify(habits)); }
 
-        // Başlangıç tetiklemeleri
         checkDailyReset();
         render();
-
     </script>
 </body>
 </html>
