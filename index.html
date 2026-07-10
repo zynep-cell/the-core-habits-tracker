@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Core Zen | Habit Tracker</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <!-- Konfeti Efekti Motoru -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
             --bg-color: #0d0d0d;
@@ -23,93 +25,70 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: var(--font-sans);
-            line-height: 1.6;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 2rem 1rem;
-            padding-bottom: 5rem;
+            background-color: var(--bg-color); color: var(--text-main);
+            font-family: var(--font-sans); line-height: 1.6;
+            min-height: 100vh; display: flex; flex-direction: column;
+            align-items: center; padding: 2rem 1rem; padding-bottom: 5rem;
+            position: relative;
         }
+
+        /* ÜST MENÜ & BULUT BUTONU */
+        .top-nav { width: 100%; max-width: 700px; display: flex; justify-content: flex-end; margin-bottom: 1rem; }
+        .cloud-btn { background: transparent; color: var(--text-muted); border: 1px solid var(--border); padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem; transition: var(--transition); display: flex; align-items: center; gap: 0.5rem; }
+        .cloud-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+        /* ZAMAN VE SAAT (SAĞ ÜST) */
+        .zen-clock {
+            position: fixed; right: 2rem; top: 2rem;
+            text-align: right; z-index: 50;
+            pointer-events: none; /* Tıklamayı engellemesin */
+        }
+        .zen-time { font-family: var(--font-sans); font-size: 2rem; font-weight: 300; color: var(--accent); letter-spacing: 2px; }
+        .zen-date { font-family: var(--font-serif); font-size: 0.9rem; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; }
+
+        @media (max-width: 900px) {
+            .zen-clock { position: static; text-align: center; margin-bottom: 2rem; }
+        }
+
+        /* %1 BETTER EVERYDAY YÜZEL YAZI (FLOATING TEXT) */
+        .floating-text {
+            position: fixed;
+            color: var(--accent);
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: 1.2rem;
+            pointer-events: none;
+            z-index: 1000;
+            animation: floatUp 1.5s ease-out forwards;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-50px) scale(1.1); }
+        }
+
+        /* TAM EKRAN VİZYON (LIGHTBOX) */
+        .lightbox {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.95); backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: var(--transition); z-index: 2000;
+            cursor: zoom-out;
+        }
+        .lightbox.active { opacity: 1; pointer-events: all; }
+        .lightbox img { max-width: 95%; max-height: 95vh; object-fit: contain; border-radius: 8px; box-shadow: 0 0 50px rgba(212, 175, 55, 0.1); }
 
         /* VİZYON ALANI */
-        .vision-container {
-            width: 100%;
-            max-width: 700px;
-            border-radius: 12px;
-            overflow: hidden;
-            position: relative;
-            margin-bottom: 2.5rem;
-            border: 1px solid var(--border);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
-            background: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #vision-image {
-            width: 100%;
-            max-height: 60vh;
-            object-fit: contain;
-            filter: grayscale(100%) blur(10px);
-            transition: var(--transition);
-        }
-
-        .vision-overlay {
-            position: absolute;
-            bottom: 0; left: 0; width: 100%;
-            padding: 2rem 1.5rem 1.5rem 1.5rem;
-            background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            pointer-events: none;
-        }
-
-        .vision-title {
-            font-family: var(--font-serif);
-            font-size: 1.8rem;
-            font-weight: 400;
-            letter-spacing: 1px;
-            pointer-events: auto;
-        }
-
-        .streak-counter {
-            font-size: 0.9rem;
-            color: var(--accent);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            font-weight: 600;
-            transition: all 0.8s ease;
-            pointer-events: auto;
-        }
-
-        .upload-btn-container {
-            position: absolute;
-            top: 1rem; right: 1rem;
-            opacity: 0.3;
-            transition: var(--transition);
-            z-index: 10;
-        }
-
+        .vision-container { width: 100%; max-width: 700px; border-radius: 12px; overflow: hidden; position: relative; margin-bottom: 2.5rem; border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,0.8); background: #000; display: flex; justify-content: center; align-items: center; cursor: zoom-in; }
+        #vision-image { width: 100%; max-height: 50vh; object-fit: contain; filter: grayscale(100%) blur(10px); transition: filter 1s ease; }
+        .vision-overlay { position: absolute; bottom: 0; left: 0; width: 100%; padding: 2rem 1.5rem 1.5rem 1.5rem; background: linear-gradient(to top, rgba(0,0,0,0.95), transparent); display: flex; justify-content: space-between; align-items: flex-end; pointer-events: none; }
+        .vision-title { font-family: var(--font-serif); font-size: 1.8rem; font-weight: 400; letter-spacing: 1px; pointer-events: auto; }
+        .streak-counter { font-size: 0.9rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; font-weight: 600; transition: all 0.8s ease; pointer-events: auto; }
+        .upload-btn-container { position: absolute; top: 1rem; right: 1rem; opacity: 0; transition: var(--transition); z-index: 10; pointer-events: auto; }
         .vision-container:hover .upload-btn-container { opacity: 1; }
-
         input[type="file"] { display: none; }
-        
-        .upload-label {
-            background: rgba(0,0,0,0.7);
-            color: var(--text-main);
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            border: 1px solid var(--border);
-            backdrop-filter: blur(4px);
-        }
+        .upload-label { background: rgba(0,0,0,0.7); color: var(--text-main); padding: 0.5rem 1rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer; border: 1px solid var(--border); backdrop-filter: blur(4px); }
 
         /* ALIŞKANLIK KARTLARI */
         .tracker-board { width: 100%; max-width: 700px; margin-bottom: 3rem; }
@@ -135,7 +114,6 @@
         .habit-details { max-height: 0; overflow: hidden; background: #111; transition: max-height 0.6s ease; }
         .habit-details.open { max-height: 1200px; }
         .details-content { padding: 1.2rem; border-top: 1px dashed var(--border); }
-        .details-notes { font-size: 0.9rem; color: #aaa; margin-bottom: 1rem; white-space: pre-wrap; }
 
         /* ALT HEDEFLER & ÇARK */
         .subtasks-list { display: flex; flex-direction: column; gap: 0.8rem; }
@@ -144,9 +122,8 @@
         .subtask-item.done .subtask-title { color: var(--text-muted); text-decoration: line-through; }
         .subtask-title { flex-grow: 1; font-size: 0.9rem; transition: var(--transition); }
         .subtask-link { color: var(--accent); text-decoration: none; font-size: 0.85rem; border: 1px solid var(--accent); padding: 0.2rem 0.6rem; border-radius: 4px; margin-left: 1rem; transition: var(--transition); }
-        .subtask-link:hover { background: var(--accent); color: #000; }
-
-        .spin-btn { width: 100%; background: transparent; color: var(--accent); border: 1px dashed var(--accent); padding: 0.8rem; border-radius: 6px; cursor: pointer; font-family: var(--font-sans); font-size: 0.9rem; margin-bottom: 1rem; transition: var(--transition); display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        
+        .spin-btn { width: 100%; background: transparent; color: var(--accent); border: 1px dashed var(--accent); padding: 0.8rem; border-radius: 6px; cursor: pointer; font-family: var(--font-sans); font-size: 0.9rem; margin-bottom: 1rem; transition: var(--transition); }
         .spin-btn:hover { background: rgba(212, 175, 55, 0.1); border-style: solid; }
         
         .subtask-item.spun-target { border-color: var(--accent); background: rgba(212, 175, 55, 0.08); box-shadow: 0 0 15px rgba(212, 175, 55, 0.15); transform: scale(1.02); }
@@ -158,32 +135,26 @@
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
         .calendar-header h3 { font-family: var(--font-serif); font-weight: 400; color: var(--accent); letter-spacing: 1px; }
         .cal-nav-btn { background: transparent; border: 1px solid var(--border); color: var(--text-main); padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; transition: var(--transition); }
-        .cal-nav-btn:hover { background: var(--border); }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
-        .cal-day-name { text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; }
-        
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+        .cal-day-name { text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; }
         .cal-cell { aspect-ratio: 1; position: relative; border-radius: 8px; border: 1px solid #2a2a2a; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--transition); }
         .cal-cell:hover { border-color: var(--accent); transform: translateY(-2px); }
         .cal-cell.empty { background: transparent; border: none; cursor: default; }
-        .cal-cell.empty:hover { transform: none; }
-        
         .cal-cell::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: var(--vision-img); background-size: cover; background-position: center; filter: grayscale(100%) blur(3px); opacity: 0.2; transition: var(--transition); z-index: 0; }
         .cal-cell.done::before { filter: grayscale(0%) blur(0px); opacity: 0.7; }
         .cal-cell.today { border: 1px solid var(--accent); }
         .cal-cell span { position: relative; z-index: 1; font-weight: 600; font-size: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
         .cal-cell.done span { color: var(--accent); }
 
-        /* MODAL */
+        /* MODALLAR */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: var(--transition); z-index: 100; }
         .modal-overlay.active { opacity: 1; pointer-events: all; }
         .modal { background: var(--surface); padding: 2rem; border-radius: 8px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); }
         .modal input, .modal textarea { width: 100%; background: #0d0d0d; border: 1px solid var(--border); color: var(--text-main); padding: 0.8rem; margin-bottom: 1rem; border-radius: 4px; font-family: var(--font-sans); }
         .modal textarea { min-height: 80px; resize: vertical; }
-        .subtask-inputs-container { margin-bottom: 1.5rem; }
-        .subtask-input-group { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; align-items: flex-start; }
-        .subtask-input-group input { margin-bottom: 0; }
-        .subtask-input-group button { background: transparent; border: 1px solid #555; color: #ff4d4d; padding: 0.8rem; border-radius: 4px; cursor: pointer; }
         
+        .subtask-input-group { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+        .subtask-input-group button { background: transparent; border: 1px solid #555; color: #ff4d4d; padding: 0.8rem; border-radius: 4px; cursor: pointer; }
         .add-subtask-btn { background: transparent; color: var(--text-muted); border: 1px dashed var(--border); padding: 0.5rem; width: 100%; border-radius: 4px; cursor: pointer; font-size: 0.85rem; margin-bottom: 1rem; }
         .add-subtask-btn:hover { color: var(--text-main); border-color: var(--text-muted); }
         
@@ -191,17 +162,31 @@
         .btn-cancel { background: transparent; border: none; color: var(--text-muted); cursor: pointer; }
         .btn-save { background: var(--text-main); color: #000; border: none; padding: 0.6rem 1.8rem; border-radius: 4px; cursor: pointer; font-weight: 600; }
 
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        .cloud-info { font-size: 0.85rem; color: #aaa; margin-bottom: 1rem; background: #111; padding: 1rem; border-radius: 6px; border: 1px dashed #333; }
+        .cloud-info a { color: var(--accent); }
     </style>
 </head>
 <body>
 
-    <div class="vision-container">
+    <!-- ZAMAN VE SAAT -->
+    <div class="zen-clock">
+        <div class="zen-time" id="clock-time">00:00:00</div>
+        <div class="zen-date" id="clock-date">Yükleniyor...</div>
+    </div>
+
+    <!-- TAM EKRAN LIGHTBOX -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+        <img id="lightbox-img" src="">
+    </div>
+
+    <div class="top-nav">
+        <button class="cloud-btn" onclick="openCloudModal()">☁️ Cihazları Eşitle</button>
+    </div>
+
+    <div class="vision-container" onclick="openLightbox(event)">
         <img id="vision-image" src="" alt="Vizyon Kolajı">
         <div class="upload-btn-container">
-            <label for="vision-upload" class="upload-label">Kolaj Yükle</label>
+            <label for="vision-upload" class="upload-label" onclick="event.stopPropagation()">Kolaj Yükle</label>
             <input type="file" id="vision-upload" accept="image/*">
         </div>
         <div class="vision-overlay">
@@ -224,9 +209,10 @@
             <h3 id="calendar-month-year"></h3>
             <button class="cal-nav-btn" onclick="changeMonth(1)">Sonraki &#8594;</button>
         </div>
-        <div class="calendar-grid" id="calendar-grid"></div>
+        <div class="cal-grid" id="calendar-grid"></div>
     </div>
 
+    <!-- ODAK DÜZENLEME MODALI -->
     <div class="modal-overlay" id="modal">
         <div class="modal">
             <h3 style="margin-bottom: 1.5rem; font-family: var(--font-serif); font-weight: 400; color: var(--accent);">Odak Düzenle</h3>
@@ -235,7 +221,7 @@
             <textarea id="habit-details" placeholder="Genel notlar..."></textarea>
             
             <h4 style="margin-bottom: 0.8rem; font-size: 0.9rem; color: var(--text-muted);">Alt Hedefler ve Linkler (Zincir)</h4>
-            <div id="modal-subtasks-container" class="subtask-inputs-container"></div>
+            <div id="modal-subtasks-container" style="margin-bottom: 1.5rem;"></div>
             <button class="add-subtask-btn" onclick="addSubtaskInput()">+ Alt Hedef / Link Ekle</button>
             
             <div class="modal-actions">
@@ -245,50 +231,107 @@
         </div>
     </div>
 
+    <!-- CLOUD SYNC MODALI -->
+    <div class="modal-overlay" id="cloud-modal">
+        <div class="modal">
+            <h3 style="margin-bottom: 1rem; font-family: var(--font-serif); font-weight: 400; color: var(--accent);">☁️ Bulut Senkronizasyonu</h3>
+            <div class="cloud-info">
+                Sistemi telefon ve PC arasında eşitlemek için ücretsiz <strong>JSONBin.io</strong> veritabanını kullanıyoruz.<br><br>
+                1. <a href="https://jsonbin.io" target="_blank">jsonbin.io</a> adresine gidip hesap açın.<br>
+                2. Yeni bir Bin (kutu) oluşturun.<br>
+                3. Size verilen <strong>Bin ID</strong>'yi (Kullanıcı Adı) ve Security kısmındaki <strong>API Key</strong>'i (Şifre) buraya yapıştırın.
+            </div>
+            
+            <label style="font-size: 0.8rem; color: var(--text-muted);">Bin ID (Kullanıcı Adı):</label>
+            <input type="text" id="cloud-bin-id" placeholder="Örn: 64b8a9...">
+            
+            <label style="font-size: 0.8rem; color: var(--text-muted);">X-Access-Key (Şifre):</label>
+            <input type="password" id="cloud-api-key" placeholder="Örn: $2b$10$...">
+
+            <div style="display: flex; gap: 1rem; margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+                <button class="btn-cancel" onclick="closeCloudModal()" style="flex:1;">İptal</button>
+                <button class="btn-save" onclick="downloadFromCloud()" style="flex:1; background: var(--surface-hover); color: var(--text-main);">☁️ Buluttan İndir</button>
+                <button class="btn-save" onclick="uploadToCloud()" style="flex:1; background: var(--accent); color: #000;">☁️ Buluta Kaydet</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // --- 1. VERİ YÜKLEME VE BAŞLANGIÇ ---
+        // --- 1. ZAMAN VE SAAT YÖNETİMİ ---
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock-time').innerText = now.toLocaleTimeString('tr-TR', { hour12: false });
+            
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            document.getElementById('clock-date').innerText = now.toLocaleDateString('tr-TR', options);
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // --- 2. VERİ VE BAŞLANGIÇ ---
         let habits = JSON.parse(localStorage.getItem('coreZenHabits')) || [];
         let historyData = JSON.parse(localStorage.getItem('coreZenHistory')) || {}; 
         let currentStreak = parseInt(localStorage.getItem('coreZenStreak')) || 0;
         let visionDataUrl = localStorage.getItem('coreZenVision') || 'https://images.unsplash.com/photo-1606240724602-5b21f896eae8?q=80&w=1000&auto=format&fit=crop';
         
+        let previousPercentage = 0; // Kutlama efekti kontrolü için
+
         document.getElementById('vision-image').src = visionDataUrl;
         document.documentElement.style.setProperty('--vision-img', `url(${visionDataUrl})`);
 
         function getLocalDateStr(date) {
-            const y = date.getFullYear(); 
-            const m = String(date.getMonth() + 1).padStart(2, '0'); 
-            const d = String(date.getDate()).padStart(2, '0');
+            const y = date.getFullYear(); const m = String(date.getMonth() + 1).padStart(2, '0'); const d = String(date.getDate()).padStart(2, '0');
             return `${y}-${m}-${d}`;
         }
-        
-        const todayDate = new Date(); 
-        const todayStr = getLocalDateStr(todayDate);
+        const todayDate = new Date(); const todayStr = getLocalDateStr(todayDate);
 
-        // --- 2. GÜNLÜK SIFIRLAMA KONTROLÜ ---
         function checkDailyReset() {
             const storedDate = localStorage.getItem('coreZenCurrentDate');
             if (storedDate !== todayStr) {
                 habits.forEach(habit => {
                     habit.done = false;
                     habit.spunSubtaskId = null;
-                    if(habit.subtasks) {
-                        habit.subtasks.forEach(st => st.done = false);
-                    }
+                    if(habit.subtasks) habit.subtasks.forEach(st => st.done = false);
                 });
                 localStorage.setItem('coreZenCurrentDate', todayStr);
                 saveHabits();
             }
         }
 
-        // --- 3. ANA RENDER FONKSİYONU ---
+        // --- 3. MOTİVASYON ANİMASYONU ---
+        function showFloatingText(event) {
+            const floatEl = document.createElement('div');
+            floatEl.className = 'floating-text';
+            floatEl.innerText = '%1 better, everyday';
+            
+            // Farenin/Dokunmanın X ve Y koordinatını al
+            const x = event.clientX || (event.touches && event.touches[0].clientX) || window.innerWidth / 2;
+            const y = event.clientY || (event.touches && event.touches[0].clientY) || window.innerHeight / 2;
+            
+            floatEl.style.left = (x - 50) + 'px';
+            floatEl.style.top = (y - 20) + 'px';
+            
+            document.body.appendChild(floatEl);
+            setTimeout(() => floatEl.remove(), 1500);
+        }
+
+        // --- 4. TAM EKRAN (LIGHTBOX) ---
+        function openLightbox(event) {
+            // Butona tıklandıysa açma
+            if(event && event.target.tagName.toLowerCase() === 'label') return;
+            const lb = document.getElementById('lightbox');
+            document.getElementById('lightbox-img').src = visionDataUrl;
+            lb.classList.add('active');
+        }
+        function closeLightbox() { document.getElementById('lightbox').classList.remove('active'); }
+
+        // --- 5. RENDER FONKSİYONU ---
         function render() {
             const container = document.getElementById('habits-container');
             container.innerHTML = '';
             let completedCount = 0;
 
             habits.forEach(habit => {
-                // "0 Olma 1 Ol" Tamamlanma Mantığı
                 if (habit.subtasks && habit.subtasks.length > 0) {
                     if (habit.spunSubtaskId) {
                         const targetTask = habit.subtasks.find(st => st.id === habit.spunSubtaskId);
@@ -298,34 +341,25 @@
                     }
                 }
                 
-                if(habit.done) {
-                    completedCount++;
-                }
+                if(habit.done) completedCount++;
 
                 const item = document.createElement('div');
                 item.className = `habit-item ${habit.done ? 'done' : ''}`;
                 
                 let subtasksHtml = '';
                 if (habit.subtasks && habit.subtasks.length > 0) {
-                    const spinButtonHtml = habit.subtasks.length > 1 
-                        ? `<button class="spin-btn" onclick="spinHabit(${habit.id})">🎲 Seçimi Evrene Bırak (0 Olma, 1 Ol)</button>` 
-                        : '';
-                        
-                    subtasksHtml = `
-                        ${spinButtonHtml}
-                        <div class="subtasks-list" id="subtasks-list-${habit.id}">
-                    `;
+                    const spinBtn = habit.subtasks.length > 1 
+                        ? `<button class="spin-btn" onclick="spinHabit(${habit.id})">🎲 Seçimi Evrene Bırak</button>` : '';
+                    subtasksHtml = `${spinBtn}<div class="subtasks-list" id="subtasks-list-${habit.id}">`;
                     
                     habit.subtasks.forEach(st => {
                         const isSpunTarget = habit.spunSubtaskId === st.id;
                         const isDimmed = habit.spunSubtaskId && !isSpunTarget;
-                        const linkHtml = st.url ? `<a href="${st.url}" target="_blank" class="subtask-link" onclick="event.stopPropagation()">Linke Git</a>` : '';
+                        const linkHtml = st.url ? `<a href="${st.url}" target="_blank" class="subtask-link" onclick="event.stopPropagation()">Link</a>` : '';
                         
                         subtasksHtml += `
-                            <div class="subtask-item ${st.done ? 'done' : ''} ${isSpunTarget ? 'spun-target' : ''} ${isDimmed ? 'dimmed' : ''}" onclick="event.stopPropagation(); toggleSubtask(${habit.id}, ${st.id})">
-                                <div class="checkbox"></div>
-                                <span class="subtask-title">${st.title}</span>
-                                ${linkHtml}
+                            <div class="subtask-item ${st.done ? 'done' : ''} ${isSpunTarget ? 'spun-target' : ''} ${isDimmed ? 'dimmed' : ''}" onclick="event.stopPropagation(); toggleSubtask(event, ${habit.id}, ${st.id})">
+                                <div class="checkbox"></div><span class="subtask-title">${st.title}</span>${linkHtml}
                             </div>`;
                     });
                     subtasksHtml += `</div>`;
@@ -333,7 +367,7 @@
 
                 item.innerHTML = `
                     <div class="habit-header" onclick="toggleDetails(${habit.id})">
-                        <div class="checkbox" onclick="event.stopPropagation(); toggleDone(${habit.id})"></div>
+                        <div class="checkbox" onclick="event.stopPropagation(); toggleDone(event, ${habit.id})"></div>
                         <div class="habit-title">${habit.title}</div>
                         <div class="habit-actions">
                             <button onclick="event.stopPropagation(); editHabit(${habit.id})">Düzenle</button>
@@ -341,352 +375,208 @@
                         </div>
                     </div>
                     <div class="habit-details" id="details-${habit.id}">
-                        <div class="details-content">
-                            ${habit.details ? `<div class="details-notes">${habit.details}</div>` : ''}
-                            ${subtasksHtml}
-                        </div>
+                        <div class="details-content">${habit.details ? `<div class="details-notes">${habit.details}</div>` : ''}${subtasksHtml}</div>
                     </div>`;
-                    
                 container.appendChild(item);
             });
 
             updateVisionAndHistory(completedCount, habits.length);
         }
 
-        // --- 4. KURA ÇEKME ALGORİTMASI ---
         function spinHabit(habitId) {
             const habit = habits.find(h => h.id === habitId);
             if(!habit || !habit.subtasks || habit.subtasks.length < 2) return;
-
-            // Ön temizlik
-            habit.spunSubtaskId = null;
-            habit.done = false;
-            habit.subtasks.forEach(st => st.done = false);
-            saveHabits();
-            
-            const listDiv = document.getElementById(`subtasks-list-${habitId}`);
-            const items = listDiv.querySelectorAll('.subtask-item');
-            
-            items.forEach(item => {
-                item.className = 'subtask-item'; 
-                item.style.opacity = '0.5';
-            });
-
+            habit.spunSubtaskId = null; habit.done = false; habit.subtasks.forEach(st => st.done = false); saveHabits();
+            const items = document.getElementById(`subtasks-list-${habitId}`).querySelectorAll('.subtask-item');
+            items.forEach(item => { item.className = 'subtask-item'; item.style.opacity = '0.5'; });
             let counter = 0;
-            const maxSpins = 20; 
-            
             const interval = setInterval(() => {
                 items.forEach(item => item.classList.remove('spinning-focus'));
-                const randomIndex = Math.floor(Math.random() * items.length);
-                items[randomIndex].classList.add('spinning-focus');
-                
-                counter++;
-                if(counter >= maxSpins) {
-                    clearInterval(interval);
-                    habit.spunSubtaskId = habit.subtasks[randomIndex].id;
-                    saveHabits();
-                    render(); 
+                const rand = Math.floor(Math.random() * items.length);
+                items[rand].classList.add('spinning-focus');
+                if(++counter >= 20) {
+                    clearInterval(interval); habit.spunSubtaskId = habit.subtasks[rand].id; saveHabits(); render();
                 }
             }, 80);
         }
 
-        // --- 5. VİZYON VE GEÇMİŞ SENKRONİZASYONU ---
+        // --- 6. VİZYON & KUTLAMA ---
         function updateVisionAndHistory(completed, total) {
             const img = document.getElementById('vision-image');
             const progressText = document.getElementById('progress-text');
             let percentage = total === 0 ? 0 : (completed / total);
             
-            const grayValue = 100 - (percentage * 100); 
-            const blurValue = 10 - (percentage * 10);
+            // Konfeti Kutlaması Kontrolü (Sadece %100'e yeni ulaşıldığında)
+            if (percentage === 1 && previousPercentage < 1 && total > 0) {
+                confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#d4af37', '#ffffff', '#808080'], disableForReducedMotion: true });
+            }
+            previousPercentage = percentage;
             
+            const grayValue = 100 - (percentage * 100); const blurValue = 10 - (percentage * 10);
             img.style.filter = `grayscale(${grayValue}%) blur(${blurValue}px)`;
             progressText.innerText = `Netlik: %${Math.round(percentage * 100)}`;
 
-            if (total > 0 && percentage === 1) { 
-                historyData[todayStr] = true; 
-            } else if (total > 0 && percentage < 1 && historyData[todayStr]) { 
-                delete historyData[todayStr]; 
-            }
+            if (total > 0 && percentage === 1) historyData[todayStr] = true; 
+            else if (total > 0 && percentage < 1 && historyData[todayStr]) delete historyData[todayStr]; 
             
-            saveHistory(); 
-            recalculateStreak(); 
-            renderCalendar();
+            saveHistory(); recalculateStreak(); renderCalendar();
         }
 
-        // --- 6. STREAK HESAPLAMA ---
         function recalculateStreak() {
-            let streak = 0; 
-            let checkDate = new Date(); 
-            checkDate.setHours(0,0,0,0);
-            
+            let streak = 0; let checkDate = new Date(); checkDate.setHours(0,0,0,0);
             if (!historyData[getLocalDateStr(checkDate)]) {
                 checkDate.setDate(checkDate.getDate() - 1);
-                if (!historyData[getLocalDateStr(checkDate)]) { 
-                    updateStreakUI(0); 
-                    return; 
-                }
+                if (!historyData[getLocalDateStr(checkDate)]) { updateStreakUI(0); return; }
             }
-            
             while (true) {
-                let dStr = getLocalDateStr(checkDate);
-                if (historyData[dStr]) { 
-                    streak++; 
-                    checkDate.setDate(checkDate.getDate() - 1); 
-                } else { 
-                    break; 
-                }
+                if (historyData[getLocalDateStr(checkDate)]) { streak++; checkDate.setDate(checkDate.getDate() - 1); } 
+                else break; 
             }
             updateStreakUI(streak);
         }
 
         function updateStreakUI(streak) {
-            currentStreak = streak; 
-            localStorage.setItem('coreZenStreak', streak);
-            
-            const streakDisplay = document.getElementById('streak-display');
-            streakDisplay.innerText = `0.6 İcraat Döngüsü: ${streak} Gün`;
-            
-            const streakBlur = Math.max(0, 4 - streak); 
-            const streakOpacity = Math.min(1, 0.4 + (streak * 0.15)); 
-            const shadowIntensity = Math.min(10, streak * 2);
-            
-            streakDisplay.style.filter = `blur(${streakBlur}px)`; 
-            streakDisplay.style.opacity = streakOpacity;
-            streakDisplay.style.textShadow = streak > 0 ? `0 0 ${shadowIntensity}px rgba(212, 175, 55, 0.5)` : 'none';
+            currentStreak = streak; localStorage.setItem('coreZenStreak', streak);
+            const display = document.getElementById('streak-display');
+            display.innerText = `0.6 İcraat Döngüsü: ${streak} Gün`;
+            display.style.filter = `blur(${Math.max(0, 4 - streak)}px)`; 
+            display.style.opacity = Math.min(1, 0.4 + (streak * 0.15));
+            display.style.textShadow = streak > 0 ? `0 0 ${Math.min(10, streak * 2)}px rgba(212, 175, 55, 0.5)` : 'none';
         }
 
-        // --- 7. TAKVİM MANTIĞI ---
-        let currentCalDate = new Date();
-        const monthNames = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
-        const dayNames = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
-
+        // --- 7. TAKVİM ---
+        let calDate = new Date();
         function renderCalendar() {
-            const year = currentCalDate.getFullYear(); 
-            const month = currentCalDate.getMonth();
-            
-            document.getElementById('calendar-month-year').innerText = `${monthNames[month]} ${year}`;
-            
-            const grid = document.getElementById('calendar-grid'); 
-            grid.innerHTML = '';
-            
-            dayNames.forEach(day => { 
-                const dayEl = document.createElement('div'); 
-                dayEl.className = 'cal-day-name'; 
-                dayEl.innerText = day; 
-                grid.appendChild(dayEl); 
-            });
-
-            const firstDay = new Date(year, month, 1); 
-            let startingDay = firstDay.getDay(); 
-            if (startingDay === 0) startingDay = 7;
-            
-            for (let i = 1; i < startingDay; i++) { 
-                const emptyCell = document.createElement('div'); 
-                emptyCell.className = 'cal-cell empty'; 
-                grid.appendChild(emptyCell); 
-            }
-
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            
-            for (let i = 1; i <= daysInMonth; i++) {
-                const cellDate = new Date(year, month, i); 
-                const cellDateStr = getLocalDateStr(cellDate);
-                
-                const cell = document.createElement('div'); 
-                cell.className = 'cal-cell';
-                
-                if (cellDateStr === todayStr) cell.classList.add('today');
-                if (historyData[cellDateStr]) cell.classList.add('done');
-                
-                cell.innerHTML = `<span>${i}</span>`;
-                
-                if (cellDate <= todayDate) { 
-                    cell.onclick = () => toggleCalendarDay(cellDateStr); 
-                } else { 
-                    cell.style.cursor = 'default'; 
-                    cell.style.opacity = '0.5'; 
-                }
-                
-                grid.appendChild(cell);
+            const y = calDate.getFullYear(); const m = calDate.getMonth();
+            document.getElementById('calendar-month-year').innerText = `${["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"][m]} ${y}`;
+            const grid = document.getElementById('calendar-grid'); grid.innerHTML = '';
+            ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"].forEach(d => { grid.innerHTML += `<div class="cal-day-name">${d}</div>`; });
+            let start = new Date(y, m, 1).getDay(); if (start === 0) start = 7;
+            for (let i = 1; i < start; i++) grid.innerHTML += `<div class="cal-cell empty"></div>`;
+            const days = new Date(y, m + 1, 0).getDate();
+            for (let i = 1; i <= days; i++) {
+                const cDateStr = getLocalDateStr(new Date(y, m, i));
+                const isToday = cDateStr === todayStr; const isDone = historyData[cDateStr];
+                const clickAction = (new Date(y, m, i) <= todayDate) ? `onclick="toggleCalDay('${cDateStr}')"` : `style="cursor:default;opacity:0.5"`;
+                grid.innerHTML += `<div class="cal-cell ${isToday ? 'today' : ''} ${isDone ? 'done' : ''}" ${clickAction}><span>${i}</span></div>`;
             }
         }
-
-        function toggleCalendarDay(dateStr) {
-            if (dateStr === todayStr) { 
-                alert("Bugünün durumunu değiştirmek için lütfen yukarıdaki görevleri işaretleyin."); 
-                return; 
-            }
-            if (historyData[dateStr]) { 
-                delete historyData[dateStr]; 
-            } else { 
-                historyData[dateStr] = true; 
-            }
-            saveHistory(); 
-            recalculateStreak(); 
-            renderCalendar();
+        function toggleCalDay(dStr) {
+            if (dStr === todayStr) { alert("Bugünü yukardan işaretleyin."); return; }
+            if (historyData[dStr]) delete historyData[dStr]; else historyData[dStr] = true;
+            saveHistory(); recalculateStreak(); renderCalendar();
         }
+        function changeMonth(dir) { calDate.setMonth(calDate.getMonth() + dir); renderCalendar(); }
 
-        function changeMonth(dir) { 
-            currentCalDate.setMonth(currentCalDate.getMonth() + dir); 
-            renderCalendar(); 
-        }
-
-        // --- 8. ETKİLEŞİM VE GÖREV YÖNETİMİ ---
-        function toggleDone(habitId) { 
+        // --- 8. ETKİLEŞİMLER ---
+        function toggleDone(event, habitId) { 
             const h = habits.find(x => x.id === habitId); 
             if(h) { 
                 h.done = !h.done; 
-                if(h.subtasks) {
-                    h.subtasks.forEach(st => { 
-                        if(!h.spunSubtaskId || h.spunSubtaskId === st.id) {
-                            st.done = h.done; 
-                        }
-                    }); 
-                }
-                saveHabits(); 
-                render(); 
+                if(h.done) showFloatingText(event); // Motivasyon efekti
+                if(h.subtasks) h.subtasks.forEach(st => { if(!h.spunSubtaskId || h.spunSubtaskId === st.id) st.done = h.done; }); 
+                saveHabits(); render(); 
             } 
         }
 
-        function toggleSubtask(hId, sId) { 
+        function toggleSubtask(event, hId, sId) { 
             const h = habits.find(x => x.id === hId); 
             if(h && h.subtasks) { 
                 const s = h.subtasks.find(x => x.id === sId); 
                 if(s) { 
                     s.done = !s.done; 
-                    saveHabits(); 
-                    render(); 
+                    if(s.done) showFloatingText(event); // Motivasyon efekti
+                    saveHabits(); render(); 
                 } 
             } 
         }
 
-        function toggleDetails(id) { 
-            document.getElementById(`details-${id}`).classList.toggle('open'); 
-        }
+        function toggleDetails(id) { document.getElementById(`details-${id}`).classList.toggle('open'); }
+        function deleteHabit(id) { if(confirm('Silmek istediğine emin misin?')) { habits = habits.filter(h => h.id !== id); saveHabits(); render(); } }
 
-        function deleteHabit(id) { 
-            if(confirm('Silmek istediğine emin misin?')) { 
-                habits = habits.filter(h => h.id !== id); 
-                saveHabits(); 
-                render(); 
-            } 
-        }
-
-        // --- 9. MODAL KONTROLLERİ ---
-        const modal = document.getElementById('modal'); 
-        const idInput = document.getElementById('habit-id'); 
-        const titleInput = document.getElementById('habit-title'); 
-        const detailsInput = document.getElementById('habit-details'); 
-        const stContainer = document.getElementById('modal-subtasks-container'); 
-        let tempSubtasks = [];
-
-        function openModal() { 
-            idInput.value = ''; 
-            titleInput.value = ''; 
-            detailsInput.value = ''; 
-            tempSubtasks = []; 
-            renderModalSubtasks(); 
-            modal.classList.add('active'); 
-        }
-
-        function closeModal() { 
-            modal.classList.remove('active'); 
-        }
-
-        function editHabit(id) { 
-            const h = habits.find(x => x.id === id); 
-            if(h) { 
-                idInput.value = h.id; 
-                titleInput.value = h.title; 
-                detailsInput.value = h.details || ''; 
-                tempSubtasks = h.subtasks ? JSON.parse(JSON.stringify(h.subtasks)) : []; 
-                renderModalSubtasks(); 
-                modal.classList.add('active'); 
-            } 
-        }
-
-        function renderModalSubtasks() { 
-            stContainer.innerHTML = ''; 
-            tempSubtasks.forEach((st, i) => { 
-                const div = document.createElement('div');
-                div.className = 'subtask-input-group';
-                div.innerHTML = `
-                    <input type="text" placeholder="Alt Hedef Adı" value="${st.title}" onchange="updateTempSubtask(${i}, 'title', this.value)">
-                    <input type="text" placeholder="URL (İsteğe bağlı)" value="${st.url || ''}" onchange="updateTempSubtask(${i}, 'url', this.value)">
-                    <button onclick="removeTempSubtask(${i})">X</button>
-                `;
-                stContainer.appendChild(div);
-            }); 
-        }
-
-        function addSubtaskInput() { 
-            tempSubtasks.push({ id: Date.now() + Math.random(), title: '', url: '', done: false }); 
-            renderModalSubtasks(); 
-        }
-
-        function updateTempSubtask(i, field, value) { 
-            tempSubtasks[i][field] = value; 
-        }
-
-        function removeTempSubtask(i) { 
-            tempSubtasks.splice(i, 1); 
-            renderModalSubtasks(); 
-        }
-
+        // --- 9. MODAL & KAYIT ---
+        let tempSt = [];
+        function openModal() { document.getElementById('habit-id').value = ''; document.getElementById('habit-title').value = ''; document.getElementById('habit-details').value = ''; tempSt = []; renderModalSt(); document.getElementById('modal').classList.add('active'); }
+        function closeModal() { document.getElementById('modal').classList.remove('active'); }
+        function editHabit(id) { const h = habits.find(x => x.id === id); if(h) { document.getElementById('habit-id').value = h.id; document.getElementById('habit-title').value = h.title; document.getElementById('habit-details').value = h.details || ''; tempSt = h.subtasks ? JSON.parse(JSON.stringify(h.subtasks)) : []; renderModalSt(); document.getElementById('modal').classList.add('active'); } }
+        function renderModalSt() { const c = document.getElementById('modal-subtasks-container'); c.innerHTML = ''; tempSt.forEach((st, i) => { c.innerHTML += `<div class="subtask-input-group"><input type="text" placeholder="Adı" value="${st.title}" onchange="tempSt[${i}].title=this.value"><input type="text" placeholder="URL" value="${st.url || ''}" onchange="tempSt[${i}].url=this.value"><button onclick="tempSt.splice(${i},1); renderModalSt()">X</button></div>`; }); }
+        function addSubtaskInput() { tempSt.push({ id: Date.now()+Math.random(), title: '', url: '', done: false }); renderModalSt(); }
+        
         function saveHabit() {
-            const id = idInput.value; 
-            const title = titleInput.value.trim(); 
-            const details = detailsInput.value.trim();
-            
-            if(!title) return alert('Ana başlık girin.');
-            
-            const finalSt = tempSubtasks.filter(st => st.title.trim() !== '');
-            
-            if(id) { 
-                const h = habits.find(x => x.id === parseInt(id)); 
-                h.title = title; 
-                h.details = details; 
-                h.subtasks = finalSt; 
-            } else { 
-                habits.push({ id: Date.now(), title, details, subtasks: finalSt, done: false, spunSubtaskId: null }); 
-            }
-            
-            saveHabits(); 
-            closeModal(); 
-            render();
+            const id = document.getElementById('habit-id').value; const title = document.getElementById('habit-title').value.trim(); const details = document.getElementById('habit-details').value.trim();
+            if(!title) return alert('Başlık girin.');
+            const finalSt = tempSt.filter(st => st.title.trim() !== '');
+            if(id) { const h = habits.find(x => x.id === parseInt(id)); h.title = title; h.details = details; h.subtasks = finalSt; } 
+            else habits.push({ id: Date.now(), title, details, subtasks: finalSt, done: false, spunSubtaskId: null });
+            saveHabits(); closeModal(); render();
         }
 
-        // --- 10. GÖRSEL YÜKLEME ---
-        document.getElementById('vision-upload').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if(file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    visionDataUrl = event.target.result; 
-                    document.getElementById('vision-image').src = visionDataUrl;
-                    document.documentElement.style.setProperty('--vision-img', `url(${visionDataUrl})`); 
-                    try { 
-                        localStorage.setItem('coreZenVision', visionDataUrl); 
-                    } catch (e) { 
-                        alert('Boyut çok büyük. Daha küçük bir görsel seçin.'); 
-                    }
-                }; 
-                reader.readAsDataURL(file);
-            }
+        document.getElementById('vision-upload').addEventListener('change', e => {
+            const f = e.target.files[0];
+            if(f) { const r = new FileReader(); r.onload = ev => { visionDataUrl = ev.target.result; document.getElementById('vision-image').src = visionDataUrl; document.documentElement.style.setProperty('--vision-img', `url(${visionDataUrl})`); try{ localStorage.setItem('coreZenVision', visionDataUrl); }catch(err){alert('Dosya çok büyük!');} }; r.readAsDataURL(f); }
         });
 
-        // --- 11. KAYIT FONKSİYONLARI ---
-        function saveHabits() { 
-            localStorage.setItem('coreZenHabits', JSON.stringify(habits)); 
+        function saveHabits() { localStorage.setItem('coreZenHabits', JSON.stringify(habits)); }
+        function saveHistory() { localStorage.setItem('coreZenHistory', JSON.stringify(historyData)); }
+
+        // --- 10. CLOUD SYNC FONKSİYONLARI ---
+        function openCloudModal() {
+            document.getElementById('cloud-bin-id').value = localStorage.getItem('coreZenCloudBin') || '';
+            document.getElementById('cloud-api-key').value = localStorage.getItem('coreZenCloudKey') || '';
+            document.getElementById('cloud-modal').classList.add('active');
         }
-        function saveHistory() { 
-            localStorage.setItem('coreZenHistory', JSON.stringify(historyData)); 
+        function closeCloudModal() { document.getElementById('cloud-modal').classList.remove('active'); }
+
+        async function uploadToCloud() {
+            const binId = document.getElementById('cloud-bin-id').value.trim();
+            const apiKey = document.getElementById('cloud-api-key').value.trim();
+            if(!binId || !apiKey) return alert("Lütfen Bin ID ve API Key girin.");
+            
+            localStorage.setItem('coreZenCloudBin', binId);
+            localStorage.setItem('coreZenCloudKey', apiKey);
+
+            const payload = { habits: habits, history: historyData, lastDate: localStorage.getItem('coreZenCurrentDate') };
+            
+            try {
+                const btn = event.target; btn.innerText = "Yükleniyor..."; btn.disabled = true;
+                const req = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Access-Key': apiKey },
+                    body: JSON.stringify(payload)
+                });
+                if(req.ok) { alert("Veriler buluta başarıyla kaydedildi! ☁️"); closeCloudModal(); } 
+                else alert("Hata: Bilgileri kontrol edin.");
+            } catch(e) { alert("Bağlantı hatası!"); } finally { event.target.innerText = "☁️ Buluta Kaydet"; event.target.disabled = false; }
         }
 
-        // --- BAŞLATMA ---
-        checkDailyReset(); 
-        render();
+        async function downloadFromCloud() {
+            const binId = document.getElementById('cloud-bin-id').value.trim();
+            const apiKey = document.getElementById('cloud-api-key').value.trim();
+            if(!binId || !apiKey) return alert("Lütfen Bin ID ve API Key girin.");
+            
+            localStorage.setItem('coreZenCloudBin', binId);
+            localStorage.setItem('coreZenCloudKey', apiKey);
 
+            try {
+                const btn = event.target; btn.innerText = "İndiriliyor..."; btn.disabled = true;
+                const req = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+                    headers: { 'X-Access-Key': apiKey }
+                });
+                if(req.ok) {
+                    const data = await req.json();
+                    if(data.record && data.record.habits) {
+                        habits = data.record.habits;
+                        historyData = data.record.history || {};
+                        if(data.record.lastDate) localStorage.setItem('coreZenCurrentDate', data.record.lastDate);
+                        saveHabits(); saveHistory(); checkDailyReset(); render();
+                        alert("Veriler buluttan başarıyla indirildi! Cihaz güncellendi. ☁️");
+                        closeCloudModal();
+                    }
+                } else alert("Hata: Bilgileri kontrol edin.");
+            } catch(e) { alert("Bağlantı hatası!"); } finally { event.target.innerText = "☁️ Buluttan İndir"; event.target.disabled = false; }
+        }
+
+        checkDailyReset(); render();
     </script>
 </body>
 </html>
