@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Core Zen | Habit Tracker</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-    <!-- Konfeti Efekti Motoru -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
@@ -32,49 +31,35 @@
             position: relative;
         }
 
-        /* ÜST MENÜ & BULUT BUTONU */
+        /* ÜST MENÜ & SİHİRLİ LİNK BUTONU */
         .top-nav { width: 100%; max-width: 700px; display: flex; justify-content: flex-end; margin-bottom: 1rem; }
-        .cloud-btn { background: transparent; color: var(--text-muted); border: 1px solid var(--border); padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem; transition: var(--transition); display: flex; align-items: center; gap: 0.5rem; }
-        .cloud-btn:hover { color: var(--accent); border-color: var(--accent); }
+        .sync-btn { background: transparent; color: var(--text-muted); border: 1px solid var(--border); padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem; transition: var(--transition); display: flex; align-items: center; gap: 0.5rem; }
+        .sync-btn:hover { color: var(--accent); border-color: var(--accent); }
 
-        /* ZAMAN VE SAAT (SAĞ ÜST) */
-        .zen-clock {
-            position: fixed; right: 2rem; top: 2rem;
-            text-align: right; z-index: 50;
-            pointer-events: none; /* Tıklamayı engellemesin */
-        }
+        /* ZAMAN VE SAAT */
+        .zen-clock { position: fixed; right: 2rem; top: 2rem; text-align: right; z-index: 50; pointer-events: none; }
         .zen-time { font-family: var(--font-sans); font-size: 2rem; font-weight: 300; color: var(--accent); letter-spacing: 2px; }
         .zen-date { font-family: var(--font-serif); font-size: 0.9rem; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; }
 
-        @media (max-width: 900px) {
-            .zen-clock { position: static; text-align: center; margin-bottom: 2rem; }
-        }
+        @media (max-width: 900px) { .zen-clock { position: static; text-align: center; margin-bottom: 2rem; } }
 
-        /* %1 BETTER EVERYDAY YÜZEL YAZI (FLOATING TEXT) */
+        /* YÜZEL YAZI EFEKTİ */
         .floating-text {
-            position: fixed;
-            color: var(--accent);
-            font-family: var(--font-serif);
-            font-style: italic;
-            font-size: 1.2rem;
-            pointer-events: none;
-            z-index: 1000;
-            animation: floatUp 1.5s ease-out forwards;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+            position: fixed; color: var(--accent); font-family: var(--font-serif); font-style: italic;
+            font-size: 1.2rem; pointer-events: none; z-index: 1000;
+            animation: floatUp 1.5s ease-out forwards; text-shadow: 0 2px 10px rgba(0,0,0,0.8);
         }
-
         @keyframes floatUp {
             0% { opacity: 1; transform: translateY(0) scale(1); }
             100% { opacity: 0; transform: translateY(-50px) scale(1.1); }
         }
 
-        /* TAM EKRAN VİZYON (LIGHTBOX) */
+        /* TAM EKRAN LIGHTBOX */
         .lightbox {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: rgba(0,0,0,0.95); backdrop-filter: blur(10px);
             display: flex; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; transition: var(--transition); z-index: 2000;
-            cursor: zoom-out;
+            opacity: 0; pointer-events: none; transition: var(--transition); z-index: 2000; cursor: zoom-out;
         }
         .lightbox.active { opacity: 1; pointer-events: all; }
         .lightbox img { max-width: 95%; max-height: 95vh; object-fit: contain; border-radius: 8px; box-shadow: 0 0 50px rgba(212, 175, 55, 0.1); }
@@ -161,9 +146,6 @@
         .modal-actions { display: flex; justify-content: flex-end; gap: 1rem; border-top: 1px solid var(--border); padding-top: 1.5rem; }
         .btn-cancel { background: transparent; border: none; color: var(--text-muted); cursor: pointer; }
         .btn-save { background: var(--text-main); color: #000; border: none; padding: 0.6rem 1.8rem; border-radius: 4px; cursor: pointer; font-weight: 600; }
-
-        .cloud-info { font-size: 0.85rem; color: #aaa; margin-bottom: 1rem; background: #111; padding: 1rem; border-radius: 6px; border: 1px dashed #333; }
-        .cloud-info a { color: var(--accent); }
     </style>
 </head>
 <body>
@@ -179,10 +161,12 @@
         <img id="lightbox-img" src="">
     </div>
 
+    <!-- SİHİRLİ LİNK BUTONU -->
     <div class="top-nav">
-        <button class="cloud-btn" onclick="openCloudModal()">☁️ Cihazları Eşitle</button>
+        <button class="sync-btn" onclick="openSyncModal()">🔗 Sihirli Link Üret</button>
     </div>
 
+    <!-- VİZYON ALANI -->
     <div class="vision-container" onclick="openLightbox(event)">
         <img id="vision-image" src="" alt="Vizyon Kolajı">
         <div class="upload-btn-container">
@@ -231,51 +215,65 @@
         </div>
     </div>
 
-    <!-- CLOUD SYNC MODALI -->
-    <div class="modal-overlay" id="cloud-modal">
+    <!-- SİHİRLİ LİNK MODALI -->
+    <div class="modal-overlay" id="sync-modal">
         <div class="modal">
-            <h3 style="margin-bottom: 1rem; font-family: var(--font-serif); font-weight: 400; color: var(--accent);">☁️ Bulut Senkronizasyonu</h3>
-            <div class="cloud-info">
-                Sistemi telefon ve PC arasında eşitlemek için ücretsiz <strong>JSONBin.io</strong> veritabanını kullanıyoruz.<br><br>
-                1. <a href="https://jsonbin.io" target="_blank">jsonbin.io</a> adresine gidip hesap açın.<br>
-                2. Yeni bir Bin (kutu) oluşturun.<br>
-                3. Size verilen <strong>Bin ID</strong>'yi (Kullanıcı Adı) ve Security kısmındaki <strong>API Key</strong>'i (Şifre) buraya yapıştırın.
+            <h3 style="margin-bottom: 1rem; font-family: var(--font-serif); font-weight: 400; color: var(--accent);">🔗 Sihirli Link (Sunucusuz Eşitleme)</h3>
+            <div style="font-size: 0.85rem; color: #aaa; margin-bottom: 1rem; background: #111; padding: 1rem; border-radius: 6px; border: 1px dashed #333;">
+                Verilerin matematikle şifrelendi ve aşağıdaki linke dönüştürüldü. Hiçbir sunucuya kaydedilmedi.<br><br>
+                Bu linki kopyalayıp WhatsApp veya Notlar ile diğer cihazına gönder. Orada bu linki açtığında kaldığın yerden devam edeceksin.<br><br>
+                <em>(Not: Görsel çok büyük olduğu için linke eklenmedi. Diğer cihazında görseli bir defa seçmen yeterlidir.)</em>
             </div>
             
-            <label style="font-size: 0.8rem; color: var(--text-muted);">Bin ID (Kullanıcı Adı):</label>
-            <input type="text" id="cloud-bin-id" placeholder="Örn: 64b8a9...">
+            <textarea id="magic-link-output" readonly style="min-height: 100px; word-break: break-all; font-size: 0.8rem; background: #000; border: 1px solid var(--border); color: var(--accent); padding: 1rem; border-radius: 6px; width: 100%;"></textarea>
             
-            <label style="font-size: 0.8rem; color: var(--text-muted);">X-Access-Key (Şifre):</label>
-            <input type="password" id="cloud-api-key" placeholder="Örn: $2b$10$...">
-
             <div style="display: flex; gap: 1rem; margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
-                <button class="btn-cancel" onclick="closeCloudModal()" style="flex:1;">İptal</button>
-                <button class="btn-save" onclick="downloadFromCloud()" style="flex:1; background: var(--surface-hover); color: var(--text-main);">☁️ Buluttan İndir</button>
-                <button class="btn-save" onclick="uploadToCloud()" style="flex:1; background: var(--accent); color: #000;">☁️ Buluta Kaydet</button>
+                <button class="btn-cancel" onclick="closeSyncModal()" style="flex:1;">Kapat</button>
+                <button class="btn-save" onclick="copyMagicLink()" style="flex:2; background: var(--accent); color: #000;">LİNKİ KOPYALA</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- 1. ZAMAN VE SAAT YÖNETİMİ ---
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('clock-time').innerText = now.toLocaleTimeString('tr-TR', { hour12: false });
-            
-            const options = { day: 'numeric', month: 'long', year: 'numeric' };
-            document.getElementById('clock-date').innerText = now.toLocaleDateString('tr-TR', options);
+        // --- 1. SİHİRLİ LİNK (ALMA) MANTIĞI ---
+        let habits = [];
+        let historyData = {}; 
+        let currentStreak = 0;
+        let visionDataUrl = 'https://images.unsplash.com/photo-1606240724602-5b21f896eae8?q=80&w=1000&auto=format&fit=crop';
+        let previousPercentage = 0;
+
+        function checkMagicLinkOnLoad() {
+            if(window.location.hash.startsWith('#sync=')) {
+                const encoded = window.location.hash.replace('#sync=', '');
+                try {
+                    // Güvenli Unicode şifre çözücü
+                    const jsonStr = decodeURIComponent(escape(atob(encoded)));
+                    const data = JSON.parse(jsonStr);
+                    
+                    if(confirm("🔗 SİHİRLİ LİNK ALGILANDI!\n\nMevcut verilerin bu linkteki verilerle eşitlensin mi? (Diğer cihazdan geldiysen Tamam'a bas)")) {
+                        localStorage.setItem('coreZenHabits', JSON.stringify(data.habits || []));
+                        localStorage.setItem('coreZenHistory', JSON.stringify(data.history || {}));
+                        localStorage.setItem('coreZenStreak', data.streak || 0);
+                        if(data.lastDate) localStorage.setItem('coreZenCurrentDate', data.lastDate);
+                        alert("Veriler başarıyla eşitlendi! 0 Olma, 1 Ol. 🎲");
+                    }
+                } catch(e) {
+                    alert("Link bozuk veya eksik kopyalanmış olabilir.");
+                }
+                // Linki temizle ki sayfayı yenileyince tekrar sormasın
+                history.replaceState(null, null, window.location.pathname);
+            }
         }
-        setInterval(updateClock, 1000);
-        updateClock();
 
-        // --- 2. VERİ VE BAŞLANGIÇ ---
-        let habits = JSON.parse(localStorage.getItem('coreZenHabits')) || [];
-        let historyData = JSON.parse(localStorage.getItem('coreZenHistory')) || {}; 
-        let currentStreak = parseInt(localStorage.getItem('coreZenStreak')) || 0;
-        let visionDataUrl = localStorage.getItem('coreZenVision') || 'https://images.unsplash.com/photo-1606240724602-5b21f896eae8?q=80&w=1000&auto=format&fit=crop';
+        // İlk Yüklemede Sihirli Linki Kontrol Et
+        checkMagicLinkOnLoad();
+
+        // --- 2. VERİ YÜKLEME ---
+        habits = JSON.parse(localStorage.getItem('coreZenHabits')) || [];
+        historyData = JSON.parse(localStorage.getItem('coreZenHistory')) || {}; 
+        currentStreak = parseInt(localStorage.getItem('coreZenStreak')) || 0;
+        visionDataUrl = localStorage.getItem('coreZenVision') || visionDataUrl;
         
-        let previousPercentage = 0; // Kutlama efekti kontrolü için
-
         document.getElementById('vision-image').src = visionDataUrl;
         document.documentElement.style.setProperty('--vision-img', `url(${visionDataUrl})`);
 
@@ -284,6 +282,14 @@
             return `${y}-${m}-${d}`;
         }
         const todayDate = new Date(); const todayStr = getLocalDateStr(todayDate);
+
+        // --- 3. ZAMAN VE SAAT YÖNETİMİ ---
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock-time').innerText = now.toLocaleTimeString('tr-TR', { hour12: false });
+            document.getElementById('clock-date').innerText = now.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+        setInterval(updateClock, 1000); updateClock();
 
         function checkDailyReset() {
             const storedDate = localStorage.getItem('coreZenCurrentDate');
@@ -298,34 +304,27 @@
             }
         }
 
-        // --- 3. MOTİVASYON ANİMASYONU ---
+        // --- 4. MOTİVASYON ANİMASYONU ---
         function showFloatingText(event) {
             const floatEl = document.createElement('div');
             floatEl.className = 'floating-text';
             floatEl.innerText = '%1 better, everyday';
-            
-            // Farenin/Dokunmanın X ve Y koordinatını al
             const x = event.clientX || (event.touches && event.touches[0].clientX) || window.innerWidth / 2;
             const y = event.clientY || (event.touches && event.touches[0].clientY) || window.innerHeight / 2;
-            
-            floatEl.style.left = (x - 50) + 'px';
-            floatEl.style.top = (y - 20) + 'px';
-            
+            floatEl.style.left = (x - 50) + 'px'; floatEl.style.top = (y - 20) + 'px';
             document.body.appendChild(floatEl);
             setTimeout(() => floatEl.remove(), 1500);
         }
 
-        // --- 4. TAM EKRAN (LIGHTBOX) ---
+        // --- 5. TAM EKRAN (LIGHTBOX) ---
         function openLightbox(event) {
-            // Butona tıklandıysa açma
             if(event && event.target.tagName.toLowerCase() === 'label') return;
-            const lb = document.getElementById('lightbox');
             document.getElementById('lightbox-img').src = visionDataUrl;
-            lb.classList.add('active');
+            document.getElementById('lightbox').classList.add('active');
         }
         function closeLightbox() { document.getElementById('lightbox').classList.remove('active'); }
 
-        // --- 5. RENDER FONKSİYONU ---
+        // --- 6. RENDER FONKSİYONU ---
         function render() {
             const container = document.getElementById('habits-container');
             container.innerHTML = '';
@@ -400,13 +399,12 @@
             }, 80);
         }
 
-        // --- 6. VİZYON & KUTLAMA ---
+        // --- 7. VİZYON & KUTLAMA ---
         function updateVisionAndHistory(completed, total) {
             const img = document.getElementById('vision-image');
             const progressText = document.getElementById('progress-text');
             let percentage = total === 0 ? 0 : (completed / total);
             
-            // Konfeti Kutlaması Kontrolü (Sadece %100'e yeni ulaşıldığında)
             if (percentage === 1 && previousPercentage < 1 && total > 0) {
                 confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#d4af37', '#ffffff', '#808080'], disableForReducedMotion: true });
             }
@@ -444,7 +442,7 @@
             display.style.textShadow = streak > 0 ? `0 0 ${Math.min(10, streak * 2)}px rgba(212, 175, 55, 0.5)` : 'none';
         }
 
-        // --- 7. TAKVİM ---
+        // --- 8. TAKVİM ---
         let calDate = new Date();
         function renderCalendar() {
             const y = calDate.getFullYear(); const m = calDate.getMonth();
@@ -468,12 +466,12 @@
         }
         function changeMonth(dir) { calDate.setMonth(calDate.getMonth() + dir); renderCalendar(); }
 
-        // --- 8. ETKİLEŞİMLER ---
+        // --- 9. ETKİLEŞİMLER ---
         function toggleDone(event, habitId) { 
             const h = habits.find(x => x.id === habitId); 
             if(h) { 
                 h.done = !h.done; 
-                if(h.done) showFloatingText(event); // Motivasyon efekti
+                if(h.done) showFloatingText(event);
                 if(h.subtasks) h.subtasks.forEach(st => { if(!h.spunSubtaskId || h.spunSubtaskId === st.id) st.done = h.done; }); 
                 saveHabits(); render(); 
             } 
@@ -485,7 +483,7 @@
                 const s = h.subtasks.find(x => x.id === sId); 
                 if(s) { 
                     s.done = !s.done; 
-                    if(s.done) showFloatingText(event); // Motivasyon efekti
+                    if(s.done) showFloatingText(event);
                     saveHabits(); render(); 
                 } 
             } 
@@ -494,7 +492,7 @@
         function toggleDetails(id) { document.getElementById(`details-${id}`).classList.toggle('open'); }
         function deleteHabit(id) { if(confirm('Silmek istediğine emin misin?')) { habits = habits.filter(h => h.id !== id); saveHabits(); render(); } }
 
-        // --- 9. MODAL & KAYIT ---
+        // --- 10. MODAL & KAYIT ---
         let tempSt = [];
         function openModal() { document.getElementById('habit-id').value = ''; document.getElementById('habit-title').value = ''; document.getElementById('habit-details').value = ''; tempSt = []; renderModalSt(); document.getElementById('modal').classList.add('active'); }
         function closeModal() { document.getElementById('modal').classList.remove('active'); }
@@ -519,63 +517,37 @@
         function saveHabits() { localStorage.setItem('coreZenHabits', JSON.stringify(habits)); }
         function saveHistory() { localStorage.setItem('coreZenHistory', JSON.stringify(historyData)); }
 
-        // --- 10. CLOUD SYNC FONKSİYONLARI ---
-        function openCloudModal() {
-            document.getElementById('cloud-bin-id').value = localStorage.getItem('coreZenCloudBin') || '';
-            document.getElementById('cloud-api-key').value = localStorage.getItem('coreZenCloudKey') || '';
-            document.getElementById('cloud-modal').classList.add('active');
-        }
-        function closeCloudModal() { document.getElementById('cloud-modal').classList.remove('active'); }
-
-        async function uploadToCloud() {
-            const binId = document.getElementById('cloud-bin-id').value.trim();
-            const apiKey = document.getElementById('cloud-api-key').value.trim();
-            if(!binId || !apiKey) return alert("Lütfen Bin ID ve API Key girin.");
+        // --- 11. SİHİRLİ LİNK ÜRETME ---
+        function openSyncModal() {
+            const payload = {
+                habits: habits,
+                history: historyData,
+                streak: currentStreak,
+                lastDate: localStorage.getItem('coreZenCurrentDate')
+            };
             
-            localStorage.setItem('coreZenCloudBin', binId);
-            localStorage.setItem('coreZenCloudKey', apiKey);
-
-            const payload = { habits: habits, history: historyData, lastDate: localStorage.getItem('coreZenCurrentDate') };
+            const jsonStr = JSON.stringify(payload);
+            // Güvenli Unicode şifreleyici
+            const encoded = btoa(unescape(encodeURIComponent(jsonStr)));
             
-            try {
-                const btn = event.target; btn.innerText = "Yükleniyor..."; btn.disabled = true;
-                const req = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'X-Access-Key': apiKey },
-                    body: JSON.stringify(payload)
-                });
-                if(req.ok) { alert("Veriler buluta başarıyla kaydedildi! ☁️"); closeCloudModal(); } 
-                else alert("Hata: Bilgileri kontrol edin.");
-            } catch(e) { alert("Bağlantı hatası!"); } finally { event.target.innerText = "☁️ Buluta Kaydet"; event.target.disabled = false; }
+            // Mevcut URL'nin hash'siz halini alıp yeni hashi ekliyoruz
+            const baseUrl = window.location.href.split('#')[0];
+            const magicLink = `${baseUrl}#sync=${encoded}`;
+            
+            document.getElementById('magic-link-output').value = magicLink;
+            document.getElementById('sync-modal').classList.add('active');
         }
 
-        async function downloadFromCloud() {
-            const binId = document.getElementById('cloud-bin-id').value.trim();
-            const apiKey = document.getElementById('cloud-api-key').value.trim();
-            if(!binId || !apiKey) return alert("Lütfen Bin ID ve API Key girin.");
-            
-            localStorage.setItem('coreZenCloudBin', binId);
-            localStorage.setItem('coreZenCloudKey', apiKey);
+        function closeSyncModal() { document.getElementById('sync-modal').classList.remove('active'); }
 
-            try {
-                const btn = event.target; btn.innerText = "İndiriliyor..."; btn.disabled = true;
-                const req = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
-                    headers: { 'X-Access-Key': apiKey }
-                });
-                if(req.ok) {
-                    const data = await req.json();
-                    if(data.record && data.record.habits) {
-                        habits = data.record.habits;
-                        historyData = data.record.history || {};
-                        if(data.record.lastDate) localStorage.setItem('coreZenCurrentDate', data.record.lastDate);
-                        saveHabits(); saveHistory(); checkDailyReset(); render();
-                        alert("Veriler buluttan başarıyla indirildi! Cihaz güncellendi. ☁️");
-                        closeCloudModal();
-                    }
-                } else alert("Hata: Bilgileri kontrol edin.");
-            } catch(e) { alert("Bağlantı hatası!"); } finally { event.target.innerText = "☁️ Buluttan İndir"; event.target.disabled = false; }
+        function copyMagicLink() {
+            const output = document.getElementById('magic-link-output');
+            output.select();
+            document.execCommand('copy');
+            alert('🔗 Sihirli Link panoya kopyalandı! Şimdi bu linki diğer cihazında açabilirsin.');
         }
 
+        // BAŞLAT
         checkDailyReset(); render();
     </script>
 </body>
